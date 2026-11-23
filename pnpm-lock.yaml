@@ -174,11 +174,11 @@ catalogs:
       specifier: 0.11.4
       version: 0.11.4
     '@hussmartinez/sdk-core':
-      specifier: 0.4.7
-      version: 0.4.7
+      specifier: 0.4.8
+      version: 0.4.8
     '@hussmartinez/ui':
-      specifier: 0.16.0
-      version: 0.16.0
+      specifier: 0.16.5
+      version: 0.16.5
     '@playwright/test':
       specifier: 1.65.1
       version: 1.65.1
@@ -269,14 +269,14 @@ importers:
         specifier: workspace:*
         version: link:../../packages/app-shell
       '@hussmartinez/audio-sdk':
-        specifier: 0.11.0
-        version: 0.11.0(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
+        specifier: 0.11.1
+        version: 0.11.1(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
       '@hussmartinez/sdk-core':
         specifier: 'catalog:'
-        version: 0.4.7
+        version: 0.4.8
       '@hussmartinez/ui':
         specifier: 'catalog:'
-        version: 0.16.0(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
+        version: 0.16.5(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
       react:
         specifier: 'catalog:'
         version: 19.3.1
@@ -321,14 +321,14 @@ importers:
         specifier: workspace:*
         version: link:../../packages/app-shell
       '@hussmartinez/image-sdk':
-        specifier: 0.11.0
-        version: 0.11.0(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
+        specifier: 0.12.4
+        version: 0.12.4(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
       '@hussmartinez/sdk-core':
         specifier: 'catalog:'
-        version: 0.4.7
+        version: 0.4.8
       '@hussmartinez/ui':
         specifier: 'catalog:'
-        version: 0.16.0(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
+        version: 0.16.5(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
       react:
         specifier: 'catalog:'
         version: 19.3.1
@@ -373,14 +373,14 @@ importers:
         specifier: workspace:*
         version: link:../../packages/app-shell
       '@hussmartinez/pdf-sdk':
-        specifier: 0.6.0
-        version: 0.6.0(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
+        specifier: 0.6.1
+        version: 0.6.1(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
       '@hussmartinez/sdk-core':
         specifier: 'catalog:'
-        version: 0.4.7
+        version: 0.4.8
       '@hussmartinez/ui':
         specifier: 'catalog:'
-        version: 0.16.0(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
+        version: 0.16.5(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
       react:
         specifier: 'catalog:'
         version: 19.3.1
@@ -426,13 +426,13 @@ importers:
         version: link:../../packages/app-shell
       '@hussmartinez/sdk-core':
         specifier: 'catalog:'
-        version: 0.4.7
+        version: 0.4.8
       '@hussmartinez/ui':
         specifier: 'catalog:'
-        version: 0.16.0(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
+        version: 0.16.5(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
       '@hussmartinez/video-sdk':
-        specifier: 0.9.1
-        version: 0.9.1(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
+        specifier: 0.10.5
+        version: 0.10.5(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
       react:
         specifier: 'catalog:'
         version: 19.3.1
@@ -492,10 +492,10 @@ importers:
     devDependencies:
       '@hussmartinez/sdk-core':
         specifier: 'catalog:'
-        version: 0.4.7
+        version: 0.4.8
       '@hussmartinez/ui':
         specifier: 'catalog:'
-        version: 0.16.0(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
+        version: 0.16.5(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
       '@types/react':
         specifier: 'catalog:'
         version: 19.3.0
@@ -972,8 +972,8 @@ packages:
     cpu: [x64]
     os: [win32]
 
-  '@hussmartinez/audio-sdk@0.11.0':
-    resolution: {integrity: sha512-464K39K+xFQWTnay5o6KQhDgeb7G4I5gACUs/l29mgTFKlBtiG1TOQwq9Z+kOTuV5p01cxD2bqBftMv73oxxtw==}
+  '@hussmartinez/audio-sdk@0.11.1':
+    resolution: {integrity: sha512-NLvjxKLs6qw/sC/DC/vgjJYUE5VuKS+FSk5eoG3tQRGvmXCn8hB6xOf71EK3/xCcUeWNbUKcqPDj+GKOrQBP3w==}
     engines: {node: '>=24'}
     peerDependencies:
       react: '>=18.3'
@@ -984,8 +984,8 @@ packages:
       react-dom:
         optional: true
 
-  '@hussmartinez/image-sdk@0.11.0':
-    resolution: {integrity: sha512-V72C2f1owD+EP0Y0TPnHTXrV76Mt0kyBgtU0F3gDHxW1gdhlpxqbhi48GXOxVohc6GVRQWWXdvWkNNN/+gJ+tA==}
+  '@hussmartinez/image-sdk@0.12.4':
+    resolution: {integrity: sha512-QSm+bgnLV/Rn2+itOVcY/SC3+5xL56KH7wYdyfPr5DwOlhcaJKH2t8pCWb35ClqXUSp293hDsbZcr+QUNm9Gmg==}
     engines: {node: '>=24'}
     peerDependencies:
       react: '>=18.3'
@@ -996,8 +996,8 @@ packages:
       react-dom:
         optional: true
 
-  '@hussmartinez/pdf-sdk@0.6.0':
-    resolution: {integrity: sha512-lsd20zyI+ADqr3ZYnGzNPwFeJZe4e1klopkYZIuZwAd71p+OB1wYB3lr1rGCCQalXoeJOsF0asJ6zI8B5slXWw==}
+  '@hussmartinez/pdf-sdk@0.6.1':
+    resolution: {integrity: sha512-39MAj1IyOfFG8OeKs3qI/X6v6ZdUOUVv6EZI37gJaP5MldQadAhjvRo2tNWyjnSoDDzJP0ANGHWnQUXGGaTY5Q==}
     engines: {node: '>=24'}
     peerDependencies:
       react: '>=18.3'
@@ -1057,11 +1057,11 @@ packages:
       vitest:
         optional: true
 
-  '@hussmartinez/sdk-core@0.4.7':
-    resolution: {integrity: sha512-mxuuu5iyKHl9NcooOihyFsd48MlY2uh/MUk00FQH+qkK/IHyQj9mzWmETmZGTM6ywtgDJ+JFV1uD62ccrnUMwg==}
+  '@hussmartinez/sdk-core@0.4.8':
+    resolution: {integrity: sha512-7jPIrcKXlxjDyvm7Lyf0+j+1Z1xvf+Q2JCHkQJ3+t97UPnYBlojLQNTdYhEuwqmyUuTIyYSpEEdYteB0vRmwwg==}
 
-  '@hussmartinez/ui@0.16.0':
-    resolution: {integrity: sha512-lvDzBcM/8gNaZ6PuIohql51R5joU0USZ1YxobDnaiiSNRdNXci2y+q/Hg2IKcJ8hiFdWM6S874kFFFIC0NfH+w==}
+  '@hussmartinez/ui@0.16.5':
+    resolution: {integrity: sha512-tA+hSPuwYOdiqun1XW5zt4BQlZKamChgU5V/NYoIuiXvs36pN0umCKzueJLGToaucOrMt8KK4dK834YSONXiBw==}
     peerDependencies:
       react: '>=18.3'
       react-dom: '>=18.3'
@@ -1071,8 +1071,8 @@ packages:
       react-dom:
         optional: true
 
-  '@hussmartinez/video-sdk@0.9.1':
-    resolution: {integrity: sha512-ud6jLs6F4OC0ONNbCPSUNaCF/DUrxj54nyUjCgKUVXXCBDDVF2Log3MFUyeBT7u+RlJIYCPmVSTSTBe5lDIzAw==}
+  '@hussmartinez/video-sdk@0.10.5':
+    resolution: {integrity: sha512-qfuJRyuXFG4VfKt0ZYEOsGPfZh6b12dSWChoCXmfS3Bm8Qma+l3D2Cz0g5WuOtlCI6Qd240+/9Wur6fGa9i1DA==}
     engines: {node: '>=24'}
     peerDependencies:
       react: '>=18.3'
@@ -2726,26 +2726,26 @@ snapshots:
   '@esbuild/win32-x64@0.28.2':
     optional: true
 
-  '@hussmartinez/audio-sdk@0.11.0(react-dom@19.3.1(react@19.3.1))(react@19.3.1)':
+  '@hussmartinez/audio-sdk@0.11.1(react-dom@19.3.1(react@19.3.1))(react@19.3.1)':
     dependencies:
-      '@hussmartinez/sdk-core': 0.4.7
-      '@hussmartinez/ui': 0.16.0(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
+      '@hussmartinez/sdk-core': 0.4.8
+      '@hussmartinez/ui': 0.16.5(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
     optionalDependencies:
       react: 19.3.1
       react-dom: 19.3.1(react@19.3.1)
 
-  '@hussmartinez/image-sdk@0.11.0(react-dom@19.3.1(react@19.3.1))(react@19.3.1)':
+  '@hussmartinez/image-sdk@0.12.4(react-dom@19.3.1(react@19.3.1))(react@19.3.1)':
     dependencies:
-      '@hussmartinez/sdk-core': 0.4.7
-      '@hussmartinez/ui': 0.16.0(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
+      '@hussmartinez/sdk-core': 0.4.8
+      '@hussmartinez/ui': 0.16.5(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
     optionalDependencies:
       react: 19.3.1
       react-dom: 19.3.1(react@19.3.1)
 
-  '@hussmartinez/pdf-sdk@0.6.0(react-dom@19.3.1(react@19.3.1))(react@19.3.1)':
+  '@hussmartinez/pdf-sdk@0.6.1(react-dom@19.3.1(react@19.3.1))(react@19.3.1)':
     dependencies:
-      '@hussmartinez/sdk-core': 0.4.7
-      '@hussmartinez/ui': 0.16.0(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
+      '@hussmartinez/sdk-core': 0.4.8
+      '@hussmartinez/ui': 0.16.5(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
     optionalDependencies:
       react: 19.3.1
       react-dom: 19.3.1(react@19.3.1)
@@ -2770,19 +2770,19 @@ snapshots:
       vite: 8.3.8(@types/node@24.19.2)(esbuild@0.28.2)(jiti@2.7.0)(yaml@2.9.1)
       vitest: 5.1.0(@types/node@24.19.2)(happy-dom@21.0.4)(vite@8.3.8(@types/node@24.19.2)(esbuild@0.28.2)(jiti@2.7.0)(yaml@2.9.1))
 
-  '@hussmartinez/sdk-core@0.4.7': {}
+  '@hussmartinez/sdk-core@0.4.8': {}
 
-  '@hussmartinez/ui@0.16.0(react-dom@19.3.1(react@19.3.1))(react@19.3.1)':
+  '@hussmartinez/ui@0.16.5(react-dom@19.3.1(react@19.3.1))(react@19.3.1)':
     dependencies:
-      '@hussmartinez/sdk-core': 0.4.7
+      '@hussmartinez/sdk-core': 0.4.8
     optionalDependencies:
       react: 19.3.1
       react-dom: 19.3.1(react@19.3.1)
 
-  '@hussmartinez/video-sdk@0.9.1(react-dom@19.3.1(react@19.3.1))(react@19.3.1)':
+  '@hussmartinez/video-sdk@0.10.5(react-dom@19.3.1(react@19.3.1))(react@19.3.1)':
     dependencies:
-      '@hussmartinez/sdk-core': 0.4.7
-      '@hussmartinez/ui': 0.16.0(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
+      '@hussmartinez/sdk-core': 0.4.8
+      '@hussmartinez/ui': 0.16.5(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
     optionalDependencies:
       react: 19.3.1
       react-dom: 19.3.1(react@19.3.1)
