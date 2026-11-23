@@ -38,14 +38,23 @@ This app isn't like the other four. They open a file, edit it and export it, and
 - **Pointer events,** including the samples between frames (`getCoalescedEvents`) and where the pen is heading (`getPredictedEvents`), pressure and tilt.
 - **Pressure-sensitive outlines** smoothed with `perfect-freehand` (MIT licence).
 - **Two canvases:** a low-latency one (`desynchronized: true`) for the stroke being drawn, and one for finished strokes.
-- **The pen writes, fingers pan and zoom,** told apart by pointer type, so a palm on the screen never draws. A pen's barrel button switches to the eraser while held, where the pen reports it.
+- **The pen writes, fingers pan and zoom,** told apart by pointer type. A palm reports as a touch, like a finger, so touches are also judged by when they come:
+  - **A palm neither draws nor moves the page.** A touch that begins while the pen is on the screen, or within 700 ms of the pen's last event, is ignored until it lifts. So is one already down when the pen lands: it stops panning or zooming at once, and a zoom it was previewing is dropped, not kept.
+  - **Once a pen has been used,** a touch whose contact is wider than 40 CSS pixels is taken for a palm whenever it comes.
+  - **On the tablet, the check is writing a page with the hand resting on the screen:** the page mustn't move, and no ink may appear under the palm.
+- **A pen's barrel button** switches to the eraser while held, where the pen reports it.
 - **The first device is an Android tablet with an active stylus, in Chrome.** Safari on iPad and desktop browsers follow. Chromium's test protocol can send pen input with pressure and tilt, so browser tests cover drawing, erasing and undo. How the ink feels is judged on the real device.
 
 ### The shell
 
 - **A full-screen layout** in `app-shell` for the open notebook, with no header column taking width from the page.
 - **The ad slot appears in the library only,** never beside a page someone is writing on.
-- **No leave guard:** the app saves as you write, so there's nothing to lose by leaving.
+- **No leave guard,** because the app saves as you write:
+  - **When a save starts:** 400 ms after the last change, and at once when the tab is hidden or the page goes away (`visibilitychange`, `pagehide`). Saves run one at a time, and a change made during one is saved by the next.
+  - **How a write lands:** each page is its own file, written to a temporary file that replaces the old one only once it's complete. An interrupted write leaves the earlier page whole, never half of one.
+  - **What can still be lost:** if the browser is killed while a save is under way, the last moment of writing before it. A leave guard couldn't prevent that either: the browser doesn't wait for one when it closes a tab for memory or the system ends it.
+  - **When a save fails:** the changes stay in memory, the notebook says it isn't saved and offers to save again, and closing the notebook keeps it open until it's saved, unless the person chooses to close without saving.
+  - **Tests:** a failed save that keeps the changes and succeeds when tried again, a close that stays open while the save fails, a write interrupted part way, and a reload that finds every saved stroke.
 
 ### Two pull requests
 
