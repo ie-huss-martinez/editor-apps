@@ -1,6 +1,7 @@
 import { createRequire } from "node:module";
 import path from "node:path";
 import { gunzipSync } from "node:zlib";
+import { fontLaunchEnv } from "@hussmartinez/sdk-config/testing/fonts";
 import { webServersFor } from "@hussmartinez/sdk-config/testing/require-image";
 import { visualComparison } from "@hussmartinez/sdk-config/testing/visual";
 import {
@@ -64,7 +65,9 @@ export function smokeConfig({ port, engines }: SmokeOptions): PlaywrightTestConf
     // The family's strict comparison (sdk-core ADR 0054): a pixel differs
     // when it's more than one colour level from its baseline, and none may.
     expect: { toHaveScreenshot: { ...visualComparison } },
-    use: { baseURL: url, trace: "retain-on-failure" },
+    // In the image, fonts with a real bold face, as screenshots need
+    // (sdk-core ADR 0062). Elsewhere it's the process's own environment.
+    use: { baseURL: url, trace: "retain-on-failure", launchOptions: { env: fontLaunchEnv() } },
     projects: run.map((engine) => ({ name: engine, use: { ...devices[DEVICES[engine]] } })),
     // None where the guard will refuse, so a refused run starts no server.
     ...(deployment
