@@ -11,5 +11,6 @@ Significant decisions about this repository, one per file. An accepted record's 
 | [0005](0005-analytics-and-consent.md)         | Anonymous analytics through one adapter, and consent only where needed |
 | [0006](0006-ads-in-an-isolated-origin.md)     | Ads only in a sandboxed frame from another origin                      |
 | [0007](0007-the-ad-slot-contract.md)          | The ad slot: a fixed size now, a sandboxed frame later                 |
+| [0008](0008-a-notes-app-and-its-sdk.md)       | A notes app for handwriting, backed by a new notes SDK                 |
 
 Each record has a status, a date, the context, the decision, the alternatives considered and the consequences.
