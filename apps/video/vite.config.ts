@@ -5,7 +5,7 @@ import {
   themeStylesheet,
 } from "@editor-apps/build-config/vite";
 import react from "@vitejs/plugin-react";
-import { defineConfig } from "vite";
+import { defaultClientConditions, defineConfig } from "vite";
 import { appConfig } from "./src/app.config.ts";
 import { themeCss } from "./src/theme.ts";
 
@@ -26,6 +26,11 @@ export default defineConfig(({ mode }) => ({
     }),
     themeStylesheet(themeCss()),
   ],
+  // The SDK's assets are self-hosted (sdkAssets above, assetsUrl in the
+  // app), so its inlined workers resolve to a stub instead of shipping
+  // unused chunks (sdk-core ADR 0060). Without assetsUrl, a worker would
+  // then fail to start with WORKER_START_FAILED, never fall back.
+  resolve: { conditions: [...defaultClientConditions, "hm-self-hosted"] },
   server: { port: 5174 },
   build: {
     target: "es2022",
