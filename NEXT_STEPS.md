@@ -48,11 +48,8 @@ Done on 2026-11-19: every app bundles one ui and one sdk-core, set in the pnpm c
 
 ## A notes app
 
-A fifth app for handwritten notes, on a new `notes-sdk` (ADR 0008). The SDK starts after the SDK family's monorepo migration.
+A fifth app for handwritten notes, on a new `notes-sdk` (ADR 0008). Two pull requests.
 
 - [x] **The decision record** (2026-11-23): ADR 0008.
-- [ ] **The ink prototype,** outside `main`: pen, highlighter and eraser, pressure, palm rejection, and a frame rate and latency readout, judged by hand on an Android tablet with a stylus.
-- [ ] **`notes-sdk`'s first version,** in the family's monorepo: the library, templates, pen, highlighter and eraser, PDF import and export, storage, backup and restore.
-- [ ] **A full-screen layout in `app-shell`,** with the ad slot only where an app asks for it.
-- [ ] **`apps/notes`,** with its Worker connected to Workers Builds.
-- [ ] **Editing, then more,** in the order of ADR 0008's phases.
+- [ ] **`notes-sdk`, complete,** in sdk-core, then released.
+- [ ] **The full-screen layout in `app-shell` and `apps/notes`,** after the ink is judged on the tablet from a preview build, then the Worker connected to Workers Builds.

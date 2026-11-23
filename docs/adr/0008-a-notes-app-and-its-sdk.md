@@ -47,22 +47,25 @@ This app isn't like the other four. They open a file, edit it and export it, and
 - **The ad slot appears in the library only,** never beside a page someone is writing on.
 - **No leave guard:** the app saves as you write, so there's nothing to lose by leaving.
 
-### Phases
+### Two pull requests
 
-1. **Prove the ink:** a throwaway prototype, measured on the tablet for frame rate, latency and palm rejection, before `notes-sdk` starts. It never goes into `main`.
-2. **The first version:**
-   - a library with folders and no limit on notebooks;
+Huss asked on 2026-11-23 for the whole app in as few steps and reviews as possible, so there's no separate prototype step:
+
+1. **sdk-core:** `notes-sdk`, complete. That covers:
+   - the library, with folders and no limit on notebooks;
    - blank, lined, grid and dotted templates;
    - pen, highlighter, and an eraser for whole strokes or parts of them;
-   - undo and redo, zoom and pan, page thumbnails;
-   - import a PDF, write on it, and export it;
-   - saving as you write, working offline, backup and restore.
-3. **Editing:** a lasso to select, move, resize and recolour; straightening of rough shapes; text boxes and images; adding, reordering and deleting pages; an outline and links between pages.
-4. **More:**
+   - a lasso to select, move, resize and recolour;
+   - straightening of rough shapes, text boxes and images;
+   - adding, reordering and deleting pages, page thumbnails, an outline and links between pages;
+   - undo and redo, zoom and pan;
+   - import a PDF, write on it and export it;
    - search in typed text and in PDFs' text;
-   - audio recorded alongside the ink and played back stroke by stroke;
-   - research into recognising handwriting on the device;
-   - AI help from models running on the device.
+   - audio recorded alongside the ink;
+   - saving as you write, backup and restore.
+2. **editor-apps:** the full-screen layout in `app-shell` and `apps/notes`, on the published `notes-sdk`.
+
+How the ink feels is judged on the tablet from a preview build before the second pull request merges. Recognising handwriting and AI help on the device come later, each in its own pull request.
 
 **Not planned:** cloud sync and live collaboration. Both need a server that holds people's notes, which breaks the family's promise that files never leave the device. Syncing to a folder the user chooses is the closest later step.
 
