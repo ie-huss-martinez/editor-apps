@@ -82,8 +82,25 @@ jobs:
     outputs:
       ref: ${{ steps.image.outputs.ref }}
     steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          sparse-checkout: ci
+
+      # Exactly one FROM line: Microsoft's Playwright image, pinned by tag and
+      # digest. Anything else fails here, before a container is pulled.
       - id: image
-        uses: ie-huss-martinez/sdk-ci/image@ace414beadabbad28a5e2609ebdf731a2cac473b # v2.1.0
+        name: Read the image
+        env:
+          DOCKERFILE: ci/Dockerfile
+        run: |
+          refs=$(sed -n 's/^FROM //p' "$DOCKERFILE")
+          pattern='^mcr\.microsoft\.com/playwright:v[0-9]+\.[0-9]+\.[0-9]+-noble@sha256:[0-9a-f]{64}$'
+          if [ "$(printf '%s\n' "$refs" | grep -c .)" -ne 1 ] || ! printf '%s' "$refs" | grep -Eq "$pattern"; then
+            echo "::error file=$DOCKERFILE::$DOCKERFILE needs exactly one FROM line: mcr.microsoft.com/playwright:<tag>-noble@sha256:<digest>."
+            exit 1
+          fi
+          echo "ref=$refs" >> "$GITHUB_OUTPUT"
 
   # Everything that needs no browser: lint, types, unit tests and the
   # repository's own checks.
