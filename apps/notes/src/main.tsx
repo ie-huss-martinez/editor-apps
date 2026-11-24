@@ -35,7 +35,7 @@ const KEEPING = new Set<NotesLibraryEvent["type"]>([
  * anonymous events go to the app's analytics (docs/adr/0005).
  */
 function App() {
-  const editor = useEditorEvents(savedAsYouWrite);
+  const { onEvent: forward } = useEditorEvents(savedAsYouWrite);
   const handle = useRef<NotesEditorHandle>(null);
   const [view, setView] = useState<NotesEditorView>({ view: "library" });
   const asked = useRef(false);
@@ -45,14 +45,14 @@ function App() {
   // that it has a reason to. The library's notice offers it too.
   const onEvent = useCallback(
     (event: NotesLibraryEvent) => {
-      editor.onEvent(event);
+      forward(event);
       if (asked.current || !KEEPING.has(event.type)) return;
       const library = handle.current?.library;
       if (!library || library.getSnapshot().persistence?.persisted === true) return;
       asked.current = true;
       void library.requestPersistence();
     },
-    [editor.onEvent],
+    [forward],
   );
 
   return (
