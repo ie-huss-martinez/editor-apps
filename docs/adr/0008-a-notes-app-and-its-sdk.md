@@ -50,9 +50,9 @@ This app isn't like the other four. They open a file, edit it and export it, and
 - **A full-screen layout** in `app-shell` for the open notebook, with no header column taking width from the page.
 - **The ad slot appears in the library only,** never beside a page someone is writing on.
 - **No leave guard,** because the app saves as you write:
-  - **When a save starts:** 400 ms after the last change, and at once when the tab is hidden or the page goes away (`visibilitychange`, `pagehide`). Saves run one at a time, and a change made during one is saved by the next.
+  - **When a save starts:** 400 ms after the last change, but never more than 2 s after the first change not yet saved, so steady writing can't keep postponing it. It also starts at once when the tab is hidden or the page goes away (`visibilitychange`, `pagehide`). Saves run one at a time, and a change made during one is saved by the next.
   - **How a write lands:** each page is its own file, written to a temporary file that replaces the old one only once it's complete. An interrupted write leaves the earlier page whole, never half of one.
-  - **What can still be lost:** if the browser is killed while a save is under way, the last moment of writing before it. A leave guard couldn't prevent that either: the browser doesn't wait for one when it closes a tab for memory or the system ends it.
+  - **What can still be lost:** if the browser is killed without warning, at most the last 2 s of writing, plus whatever was written during a save still under way. A leave guard couldn't prevent that either: the browser doesn't wait for one when it closes a tab for memory or the system ends it.
   - **When a save fails:** the changes stay in memory, the notebook says it isn't saved and offers to save again, and closing the notebook keeps it open until it's saved, unless the person chooses to close without saving.
   - **Tests:** a failed save that keeps the changes and succeeds when tried again, a close that stays open while the save fails, a write interrupted part way, and a reload that finds every saved stroke.
 
