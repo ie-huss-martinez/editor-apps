@@ -126,6 +126,9 @@ test("a notebook has the whole screen, keeps what's written, and never asks befo
   await expect(page.locator(".app-shell-full")).toHaveCount(0);
 
   // Kept on the device: there after a reload.
+  // One page view per load: this load's, then the reload's alone.
+  await expectAnalytics(problems, analytics, appConfig.app);
+  problems.analytics.splice(0, problems.analytics.length);
   await page.reload();
   await expect(page.locator(".hm-notes-cover")).toHaveCount(1);
   await expectAnalytics(problems, analytics, appConfig.app);

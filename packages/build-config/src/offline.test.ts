@@ -4,18 +4,23 @@ import path from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
 import { buildVersion, offlinePaths, serviceWorkerSource } from "./offline.ts";
 
-let outDir: string;
+let outDir: string | undefined;
 
 function build(files: Record<string, string>): string {
-  outDir = mkdtempSync(path.join(tmpdir(), "offline-"));
+  const dir = mkdtempSync(path.join(tmpdir(), "offline-"));
+  outDir = dir;
   for (const [name, content] of Object.entries(files)) {
-    mkdirSync(path.dirname(path.join(outDir, name)), { recursive: true });
-    writeFileSync(path.join(outDir, name), content);
+    mkdirSync(path.dirname(path.join(dir, name)), { recursive: true });
+    writeFileSync(path.join(dir, name), content);
   }
-  return outDir;
+  return dir;
 }
 
-afterEach(() => rmSync(outDir, { recursive: true, force: true }));
+// Only after the tests that made a build: the source tests make none.
+afterEach(() => {
+  if (outDir) rmSync(outDir, { recursive: true, force: true });
+  outDir = undefined;
+});
 
 describe("offlinePaths", () => {
   it("lists every served file, the page as /, and leaves out Cloudflare's and its own", () => {
@@ -53,8 +58,10 @@ describe("serviceWorkerSource", () => {
     const source = serviceWorkerSource(["/", "/assets/a.js"], "0123abcd");
     expect(source).toContain('const CACHE = "offline-0123abcd";');
     expect(source).toContain('"/assets/a.js"');
-    // A page comes from the network first, and from the cache offline.
+    // A page comes from the network first, and from the cache offline or
+    // when the server answers with an error.
     expect(source).toContain('request.mode === "navigate"');
+    expect(source).toContain("response.status >= 500");
     // Other origins and other methods pass through.
     expect(source).toContain("self.location.origin");
     // A server's Vary, such as on Origin, never makes a kept file miss.

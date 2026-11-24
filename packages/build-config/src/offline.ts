@@ -63,7 +63,8 @@ export function buildVersion(outDir: string, paths: readonly string[]): string {
  *   only once every tab of the old one is closed, never under a page that
  *   still asks for the old build's files.
  * - **Pages:** from the network when there is one, so a deploy shows at
- *   once, and from the cache when there isn't.
+ *   once, and from the cache when there isn't or the server answers with
+ *   an error (5xx). Any other answer, a 404 included, is shown as it is.
  * - **Files:** from the cache, and from the network for anything it
  *   doesn't hold. A file is matched by its address alone, whatever its
  *   `Vary`: a server may vary on `Origin`, which the page's module requests
@@ -100,13 +101,15 @@ self.addEventListener("fetch", (event) => {
   const { request } = event;
   if (request.method !== "GET" || new URL(request.url).origin !== self.location.origin) return;
   if (request.mode === "navigate") {
+    const kept = () => caches.open(CACHE).then((cache) => cache.match("/", { ignoreVary: true }));
     event.respondWith(
-      fetch(request).catch(() =>
-        caches
-          .open(CACHE)
-          .then((cache) => cache.match("/", { ignoreVary: true }))
-          .then((page) => page ?? Response.error()),
-      ),
+      fetch(request)
+        .then((response) =>
+          // A server error is answered with the kept page, as no network is;
+          // anything else, a 404 included, is the server's to say.
+          response.status >= 500 ? kept().then((page) => page ?? response) : response,
+        )
+        .catch(() => kept().then((page) => page ?? Response.error())),
     );
     return;
   }
