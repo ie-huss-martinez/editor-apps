@@ -14,6 +14,11 @@ export interface PolicyOptions {
   /** The editor plays media it holds in the page: adds `media-src 'self' blob:`. */
   readonly inlineMedia?: boolean;
   /**
+   * The editor records sound: `Permissions-Policy` allows the microphone
+   * for the app's own origin, and never for a frame of another.
+   */
+  readonly microphone?: boolean;
+  /**
    * The origins of the app's analytics provider, and nothing else
    * (docs/adr/0005). Leave it out for no analytics.
    */
@@ -83,7 +88,7 @@ export function securityHeaders(options: PolicyOptions = {}): Record<string, str
     "Referrer-Policy": "no-referrer",
     // For browsers that don't know frame-ancestors.
     "X-Frame-Options": "DENY",
-    "Permissions-Policy": "camera=(), microphone=(), geolocation=(), payment=(), usb=()",
+    "Permissions-Policy": `camera=(), microphone=(${options.microphone ? "self" : ""}), geolocation=(), payment=(), usb=()`,
   };
 }
 

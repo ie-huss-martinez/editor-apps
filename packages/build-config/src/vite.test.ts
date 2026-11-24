@@ -25,6 +25,7 @@ beforeAll(async () => {
       editorApp({
         policy: { wasm: true },
         sdkAssets: { from: path.join(root, "sdk"), url: "/sdk/1.2.3/" },
+        offline: true,
       }),
     ],
   });
@@ -50,6 +51,16 @@ describe("editorApp", () => {
     expect(readFileSync(path.join(root, "dist/sdk/1.2.3/workers/worker.js"), "utf8")).toBe(
       "// a worker",
     );
+  });
+
+  it("writes a service worker that keeps the page, the bundle and the SDK's assets", () => {
+    const worker = readFileSync(path.join(root, "dist/sw.js"), "utf8");
+    const files = JSON.parse(/const FILES = (\[[\s\S]*?\]);/.exec(worker)?.[1] ?? "[]");
+    expect(files).toContain("/");
+    expect(files).toContain("/sdk/1.2.3/workers/worker.js");
+    expect(files.some((file: string) => /^\/assets\/index-[\w-]+\.js$/.test(file))).toBe(true);
+    expect(files).not.toContain("/_headers");
+    expect(files).not.toContain("/sw.js");
   });
 
   it("serves the built app with the same headers from vite preview", async () => {

@@ -1,0 +1,36 @@
+{
+  "name": "@editor-apps/notes",
+  "private": true,
+  "license": "Apache-2.0",
+  "type": "module",
+  "description": "The notes app: a thin shell around @hussmartinez/notes-sdk.",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "typecheck": "tsc --noEmit",
+    "preview": "vite preview --host 127.0.0.1",
+    "test:e2e": "hm-in-image playwright test",
+    "deploy": "wrangler deploy"
+  },
+  "dependencies": {
+    "@editor-apps/app-shell": "workspace:*",
+    "@hussmartinez/notes-sdk": "0.1.1",
+    "@hussmartinez/pdf-sdk": "0.7.1",
+    "@hussmartinez/sdk-core": "catalog:",
+    "@hussmartinez/ui": "catalog:",
+    "react": "catalog:",
+    "react-dom": "catalog:"
+  },
+  "devDependencies": {
+    "@editor-apps/build-config": "workspace:*",
+    "@hussmartinez/sdk-config": "catalog:",
+    "@playwright/test": "catalog:",
+    "@types/node": "catalog:",
+    "@types/react": "catalog:",
+    "@types/react-dom": "catalog:",
+    "@vitejs/plugin-react": "catalog:",
+    "typescript": "catalog:",
+    "vite": "catalog:",
+    "wrangler": "catalog:"
+  }
+}

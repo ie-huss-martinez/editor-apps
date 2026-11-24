@@ -107,4 +107,34 @@ describe("AppShell", () => {
     expect(analytics.event.mock.calls).toEqual([["component_error"]]);
     expect(analytics.editorEvent).not.toHaveBeenCalled();
   });
+
+  it("gives the editor the whole screen, keeping the h1 for assistive technology and no ad", () => {
+    act(() =>
+      root.render(
+        <AppShell title="Notes" tagline="t" status="Physics" ad={<p>art</p>} fullScreen>
+          <div className="app-editor">editor</div>
+        </AppShell>,
+      ),
+    );
+    expect(container.querySelector(".app-shell")?.classList.contains("app-shell-full")).toBe(true);
+    // Still the page's one h1, inside the banner, hidden on screen only.
+    expect(container.querySelectorAll("h1")).toHaveLength(1);
+    expect(container.querySelector("header h1")?.textContent).toBe("Notes");
+    expect(container.querySelector("header")?.closest(".hm-visually-hidden")).not.toBeNull();
+    expect(container.querySelector(".app-shell-ad")).toBeNull();
+    expect(container.querySelector("main .app-editor")?.textContent).toBe("editor");
+  });
+
+  it("shows the header and the ad slot again once the editor leaves the whole screen", () => {
+    const shell = (fullScreen: boolean) => (
+      <AppShell title="Notes" tagline="t" ad={<p>art</p>} fullScreen={fullScreen}>
+        <div className="app-editor">editor</div>
+      </AppShell>
+    );
+    act(() => root.render(shell(true)));
+    act(() => root.render(shell(false)));
+    expect(container.querySelector(".app-shell")?.classList.contains("app-shell-full")).toBe(false);
+    expect(container.querySelector("header")?.closest(".hm-visually-hidden")).toBeNull();
+    expect(container.querySelector(".app-shell-ad")).not.toBeNull();
+  });
 });

@@ -51,5 +51,5 @@ Done on 2026-11-19: every app bundles one ui and one sdk-core, set in the pnpm c
 A fifth app for handwritten notes, on a new `notes-sdk` (ADR 0008). Two pull requests.
 
 - [x] **The decision record** (2026-11-23): ADR 0008.
-- [ ] **`notes-sdk`, complete,** in sdk-core, then released.
-- [ ] **The full-screen layout in `app-shell` and `apps/notes`,** after the ink is judged on the tablet from a preview build, then the Worker connected to Workers Builds.
+- [x] **`notes-sdk`, complete,** in sdk-core, then released (2026-11-24): sdk-core #210, published as 0.1.0.
+- [ ] **The full-screen layout in `app-shell` and `apps/notes`,** installable and offline (ADR 0009), after the ink is judged on the tablet from a preview build, then the Worker connected to Workers Builds.

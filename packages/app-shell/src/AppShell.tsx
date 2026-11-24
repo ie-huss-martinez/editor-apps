@@ -1,4 +1,4 @@
-import { AnnouncerProvider, UiMessagesProvider } from "@hussmartinez/ui/react";
+import { AnnouncerProvider, UiMessagesProvider, VisuallyHidden } from "@hussmartinez/ui/react";
 import type { ReactNode } from "react";
 import { AdSlot } from "./AdSlot.tsx";
 import { ErrorBoundary } from "./ErrorBoundary.tsx";
@@ -26,6 +26,13 @@ export interface AppShellProps {
    * slot, and the editor takes the whole width.
    */
   readonly ad?: ReactNode;
+  /**
+   * The editor takes the whole screen, as an open notebook does
+   * (docs/adr/0008): the header is hidden on screen but stays for
+   * assistive technology, with the page's one `<h1>`, the main area has no
+   * margin, and there's no ad slot, whatever `ad` holds.
+   */
+  readonly fullScreen?: boolean;
   /** The SDK's editor, which fills the main area. Give it the class `app-editor`. */
   readonly children: ReactNode;
 }
@@ -35,29 +42,41 @@ export interface AppShellProps {
  * skip link, a header with the app's name as the only `<h1>`, the `<main>`
  * landmark at full height, the shared error boundary around the editor, and
  * the leave guard while there are unsaved edits, and the ad slot beside the
- * editor when the app gives its art. Import
+ * editor when the app gives its art. With `fullScreen`, the editor has the
+ * whole screen. Import
  * `@editor-apps/app-shell/styles.css` after ui's and the SDK's stylesheets.
  */
-export function AppShell({ title, tagline, status, unsaved = false, ad, children }: AppShellProps) {
+export function AppShell({
+  title,
+  tagline,
+  status,
+  unsaved = false,
+  ad,
+  fullScreen = false,
+  children,
+}: AppShellProps) {
   useLeaveGuard(unsaved);
+  const header = (
+    <header className="app-shell-header">
+      <h1 className="app-shell-title">{title}</h1>
+      <p className="app-shell-tagline">{tagline}</p>
+      {status !== undefined && <output className="app-shell-status">{status}</output>}
+    </header>
+  );
   return (
     <UiMessagesProvider messages={messages}>
       <AnnouncerProvider>
-        <div className="app-shell">
+        <div className={fullScreen ? "app-shell app-shell-full" : "app-shell"}>
           <a className="app-shell-skip" href="#app-shell-main">
             {messages.t("shell.skip")}
           </a>
-          <header className="app-shell-header">
-            <h1 className="app-shell-title">{title}</h1>
-            <p className="app-shell-tagline">{tagline}</p>
-            {status !== undefined && <output className="app-shell-status">{status}</output>}
-          </header>
+          {fullScreen ? <VisuallyHidden as="div">{header}</VisuallyHidden> : header}
           <div className="app-shell-body">
             {/* Focusable by the skip link only, so it isn't a tab stop. */}
             <main id="app-shell-main" className="app-shell-main" tabIndex={-1}>
               <ErrorBoundary>{children}</ErrorBoundary>
             </main>
-            {ad !== undefined && <AdSlot>{ad}</AdSlot>}
+            {ad !== undefined && !fullScreen && <AdSlot>{ad}</AdSlot>}
           </div>
         </div>
       </AnnouncerProvider>

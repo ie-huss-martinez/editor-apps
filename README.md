@@ -1,6 +1,6 @@
 # editor-apps
 
-Four browser-only editors, for PDF, audio, image and video files, in one repository. Files never leave the device.
+Five browser-only apps in one repository: editors for PDF, audio, image and video files, and handwritten notes. Files and notes never leave the device.
 
 Each app is a thin shell around an editor SDK of the [`@hussmartinez`](https://www.npmjs.com/org/hussmartinez) family: the SDK opens, edits and exports; the app adds its header, theme, response headers and deployment.
 
@@ -10,10 +10,10 @@ Each app is a thin shell around an editor SDK of the [`@hussmartinez`](https://w
 
 | Path                     | What it holds                                                                                                                                           |
 | ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `apps/<app>/`            | One app each: `pdf`, `audio`, `image` and `video`, arriving one pull request at a time                                                                  |
+| `apps/<app>/`            | One app each: `pdf`, `audio`, `image`, `video` and `notes`                                                                                              |
 | `packages/build-config/` | Build and test helpers: the response headers and Content Security Policy, the Vite plugin, and the repository's own checks. Private, never published    |
-| `packages/analytics/`    | Anonymous analytics through PostHog, shared by the four apps: a page view per load and the SDKs' events. Private, never published                       |
-| `packages/app-shell/`    | The page around every editor: header, skip link, error boundary, leave guard, ad slot, ui's providers, and analytics start-up. Private, never published |
+| `packages/analytics/`    | Anonymous analytics through PostHog, shared by the apps: a page view per load and the SDKs' events. Private, never published                       |
+| `packages/app-shell/`    | The page around every editor: header, skip link, error boundary, leave guard, ad slot, a full-screen layout, ui's providers, and start-up. Private, never published |
 | `docs/adr/`              | The decisions behind the repository                                                                                                                     |
 | `docs/deploy.md`         | How the apps deploy, and the settings that live outside the repository                                                                                  |
 | `ci/Dockerfile`          | The pinned Playwright image for browser tests                                                                                                           |
