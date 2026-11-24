@@ -45,3 +45,11 @@ Done on 2026-11-19: every app bundles one ui and one sdk-core, set in the pnpm c
 
 - [x] **The SDKs converge on one ui minor,** and `app-shell` may use all of it.
 - [x] **ui and sdk-core in the pnpm catalog:** one line sets them for every app; a new minor also needs every SDK to accept it and app-shell's peer range moved (ADR 0001). The check stays as a guard.
+
+## A notes app
+
+A fifth app for handwritten notes, on a new `notes-sdk` (ADR 0008). Two pull requests.
+
+- [x] **The decision record** (2026-11-23): ADR 0008.
+- [ ] **`notes-sdk`, complete,** in sdk-core, then released.
+- [ ] **The full-screen layout in `app-shell` and `apps/notes`,** after the ink is judged on the tablet from a preview build, then the Worker connected to Workers Builds.
