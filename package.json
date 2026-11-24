@@ -8,7 +8,7 @@
     "node": ">=24 <25"
   },
   "scripts": {
-    "lint": "biome check . && pnpm lint:css && hm-lint-react apps/audio/src apps/image/src apps/pdf/src apps/video/src packages/analytics/src packages/app-shell/src packages/build-config/src && hm-check-hidden-unicode",
+    "lint": "biome check . && pnpm lint:css && hm-lint-react apps/audio/src apps/image/src apps/notes/src apps/pdf/src apps/video/src packages/analytics/src packages/app-shell/src packages/build-config/src && hm-check-hidden-unicode",
     "lint:css": "stylelint \"**/*.css\" --allow-empty-input",
     "lint:fix": "biome check --write .",
     "typecheck": "pnpm -r run typecheck",

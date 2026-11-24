@@ -5,6 +5,7 @@ export default withReactLint(undefined, {
   paths: [
     "apps/audio/src",
     "apps/image/src",
+    "apps/notes/src",
     "apps/pdf/src",
     "apps/video/src",
     "packages/analytics/src",

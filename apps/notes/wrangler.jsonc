@@ -1,0 +1,15 @@
+{
+  "$schema": "../../node_modules/wrangler/config-schema.json",
+  "name": "notes-editor",
+  "compatibility_date": "2026-10-01",
+  // Production is the custom domain. Cloudflare creates its DNS record and
+  // certificate on deploy.
+  "routes": [{ "pattern": "notes.forfreedom.app", "custom_domain": true }],
+  // Stays on explicitly: with routes, wrangler's default becomes false.
+  // Turning workers.dev off is a later step.
+  "workers_dev": true,
+  "assets": {
+    "directory": "./dist"
+  },
+  "previews": {}
+}

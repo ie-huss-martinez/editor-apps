@@ -12,14 +12,29 @@ export interface StartOptions {
   readonly render: () => ReactNode;
   /** Where to render. Defaults to `#root`. */
   readonly root?: HTMLElement;
+  /**
+   * Registers the service worker that the build's `offline` option writes
+   * (docs/adr/0009), so the app opens without a network. Where there's no
+   * service worker to register, as on the dev server, nothing happens.
+   */
+  readonly offline?: boolean;
 }
+
+/** The service worker's address, at the root so it serves the whole app. */
+const SERVICE_WORKER = "/sw.js";
 
 /**
  * Starts an app the same way in every app: its analytics, with one page
  * view per load, then the app, in React's strict mode, with the analytics
  * in context for {@link useAnalytics} and the error boundary.
  */
-export function startApp({ app, analytics: { key, host }, render, root }: StartOptions): void {
+export function startApp({
+  app,
+  analytics: { key, host },
+  render,
+  root,
+  offline = false,
+}: StartOptions): void {
   const analytics = createAnalytics({ app, key, host });
   analytics.pageView();
   const element = root ?? document.getElementById("root");
@@ -29,4 +44,12 @@ export function startApp({ app, analytics: { key, host }, render, root }: StartO
       <AnalyticsContext.Provider value={analytics}>{render()}</AnalyticsContext.Provider>
     </StrictMode>,
   );
+  if (offline && "serviceWorker" in navigator) {
+    // Once the page has loaded, so keeping the files never competes with it.
+    // A failure only means no offline copy this time: the app works without.
+    const register = () =>
+      void navigator.serviceWorker.register(SERVICE_WORKER, { scope: "/" }).catch(() => undefined);
+    if (document.readyState === "complete") register();
+    else window.addEventListener("load", register, { once: true });
+  }
 }

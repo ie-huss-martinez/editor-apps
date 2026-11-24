@@ -57,4 +57,66 @@ describe("startApp", () => {
       }),
     ).toThrow(/no #root/);
   });
+
+  it("registers the build's service worker for the whole app when asked, once the page has loaded", async () => {
+    const { startApp } = await import("./start.tsx");
+    const root = document.createElement("div");
+    document.body.append(root);
+    const register = vi.fn(() => Promise.resolve({}));
+    Object.defineProperty(navigator, "serviceWorker", {
+      value: { register },
+      configurable: true,
+    });
+    try {
+      await act(async () =>
+        startApp({
+          app: "notes",
+          analytics: { key: undefined, host: "https://ph.example" },
+          render: () => <App />,
+          root,
+          offline: true,
+        }),
+      );
+      if (document.readyState !== "complete") window.dispatchEvent(new Event("load"));
+      expect(register).toHaveBeenCalledExactlyOnceWith("/sw.js", { scope: "/" });
+    } finally {
+      Reflect.deleteProperty(navigator, "serviceWorker");
+    }
+  });
+
+  it("registers nothing unless the app works offline, and nothing where it can't", async () => {
+    const { startApp } = await import("./start.tsx");
+    const root = document.createElement("div");
+    document.body.append(root);
+    const register = vi.fn(() => Promise.reject(new Error("no service worker here")));
+    Object.defineProperty(navigator, "serviceWorker", {
+      value: { register },
+      configurable: true,
+    });
+    try {
+      await act(async () =>
+        startApp({
+          app: "pdf",
+          analytics: { key: undefined, host: "https://ph.example" },
+          render: () => <App />,
+          root,
+        }),
+      );
+      expect(register).not.toHaveBeenCalled();
+      // A refused registration is no error the page shows.
+      await act(async () =>
+        startApp({
+          app: "notes",
+          analytics: { key: undefined, host: "https://ph.example" },
+          render: () => <App />,
+          root: document.body.appendChild(document.createElement("div")),
+          offline: true,
+        }),
+      );
+      if (document.readyState !== "complete") window.dispatchEvent(new Event("load"));
+      expect(register).toHaveBeenCalledTimes(1);
+    } finally {
+      Reflect.deleteProperty(navigator, "serviceWorker");
+    }
+  });
 });

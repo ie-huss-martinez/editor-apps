@@ -72,6 +72,16 @@ describe("securityHeaders", () => {
   });
 });
 
+describe("securityHeaders, for an app that records sound", () => {
+  it("allows the microphone for the app's own origin only, and changes nothing else", () => {
+    const headers = securityHeaders({ microphone: true });
+    expect(headers["Permissions-Policy"]).toBe(
+      "camera=(), microphone=(self), geolocation=(), payment=(), usb=()",
+    );
+    expect(headers["Content-Security-Policy"]).toBe(contentSecurityPolicy());
+  });
+});
+
 describe("headersFile", () => {
   it("writes one block for every path, and one for each immutable pattern", () => {
     expect(headersFile({ "X-One": "1", "X-Two": "2" }, ["/assets/*"])).toBe(

@@ -99,6 +99,19 @@ body {
   overflow: auto;
 }
 
+/*
+ * The whole screen for the editor (docs/adr/0008): the header is hidden
+ * (ui's VisuallyHidden takes it out of the flow), so the body is the only
+ * row, and the editor meets the screen's edges.
+ */
+.app-shell-full {
+  grid-template-rows: minmax(0, 1fr);
+}
+
+.app-shell-full .app-shell-main {
+  padding: 0;
+}
+
 .app-shell-main > .app-editor {
   flex: 1;
   /* stylelint-disable-next-line hm/no-literal-values -- the editor's usable minimum on a short screen. */

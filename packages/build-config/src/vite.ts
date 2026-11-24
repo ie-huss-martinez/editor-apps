@@ -4,6 +4,7 @@ import path from "node:path";
 import { loadEnv, type Plugin } from "vite";
 import { headersFile, httpsOrigin, type PolicyOptions, securityHeaders } from "./headers.ts";
 import { packageRoot, thirdPartyLicenses } from "./licenses.ts";
+import { writeServiceWorker } from "./offline.ts";
 
 /**
  * What an app tells the build about itself. Everything else is the same in
@@ -28,6 +29,12 @@ export interface EditorAppOptions {
      */
     readonly url: string;
   };
+  /**
+   * The app works offline (docs/adr/0009): the build writes `sw.js`, a
+   * service worker that keeps every file of the build, the SDK's assets
+   * included. Register it with `startApp`'s `offline`.
+   */
+  readonly offline?: boolean;
 }
 
 /** The dev server's content types for an SDK's assets. Production's come from Cloudflare. */
@@ -110,11 +117,15 @@ export function editorApp(options: EditorAppOptions = {}): Plugin[] {
       });
     },
     closeBundle() {
-      if (!assets || this.environment.config.command !== "build") return;
-      if (!existsSync(assets.from)) {
-        throw new Error(`sdkAssets.from doesn't exist: ${assets.from}`);
+      if (this.environment.config.command !== "build") return;
+      if (assets) {
+        if (!existsSync(assets.from)) {
+          throw new Error(`sdkAssets.from doesn't exist: ${assets.from}`);
+        }
+        cpSync(assets.from, path.join(outDir, assets.url), { recursive: true });
       }
-      cpSync(assets.from, path.join(outDir, assets.url), { recursive: true });
+      // Last, so it keeps every file the build holds, the SDK's copied above.
+      if (options.offline) writeServiceWorker(outDir);
     },
   };
   return [app, thirdPartyLicenses(sdkRoot ? [sdkRoot] : [])];
