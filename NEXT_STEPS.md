@@ -52,4 +52,4 @@ A fifth app for handwritten notes, on a new `notes-sdk` (ADR 0008). Two pull req
 
 - [x] **The decision record** (2026-11-23): ADR 0008.
 - [x] **`notes-sdk`, complete,** in sdk-core, then released (2026-11-24): sdk-core #210, published as 0.1.0.
-- [ ] **The full-screen layout in `app-shell` and `apps/notes`,** installable and offline (ADR 0009), after the ink is judged on the tablet from a preview build, then the Worker connected to Workers Builds.
+- [x] **The full-screen layout in `app-shell` and `apps/notes`,** installable and offline (ADR 0009) (2026-11-25): #47. The `notes-editor` Worker is connected to Workers Builds, with the same settings and build token as the other apps.
