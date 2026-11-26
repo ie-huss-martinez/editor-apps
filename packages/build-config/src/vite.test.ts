@@ -4,15 +4,22 @@ import path from "node:path";
 import { build, createServer, preview } from "vite";
 import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from "vitest";
 import { contentSecurityPolicy } from "./headers.ts";
+import { themeScript, themeScriptPath } from "./theme-script.ts";
 import { editorApp, posthogPolicy } from "./vite.ts";
 
 let root: string;
+
+const PREFERENCES_KEY = "editor-preferences:fixture";
+const THEME_URL = themeScriptPath(themeScript(PREFERENCES_KEY));
 
 beforeAll(async () => {
   root = mkdtempSync(path.join(tmpdir(), "editor-app-"));
   writeFileSync(
     path.join(root, "index.html"),
-    '<!doctype html><title>Fixture</title><script type="module" src="/main.js"></script>',
+    [
+      '<!doctype html><html lang="en"><head><meta charset="utf-8" /><title>Fixture</title>',
+      '<script type="module" src="/main.js"></script></head><body></body></html>',
+    ].join(""),
   );
   writeFileSync(path.join(root, "main.js"), "document.title = 'Built';");
   mkdirSync(path.join(root, "sdk/workers"), { recursive: true });
@@ -26,6 +33,8 @@ beforeAll(async () => {
         policy: { wasm: true },
         sdkAssets: { from: path.join(root, "sdk"), url: "/sdk/1.2.3/" },
         offline: true,
+        preferencesKey: PREFERENCES_KEY,
+        canonicalUrl: "https://fixture.example/",
       }),
     ],
   });
@@ -45,6 +54,25 @@ describe("editorApp", () => {
     expect(headers).toContain(
       "\n/sdk/1.2.3/*\n  Cache-Control: public, max-age=31536000, immutable\n",
     );
+  });
+
+  it("loads the theme script first in the page's head, as a blocking script from its own origin", () => {
+    const html = readFileSync(path.join(root, "dist/index.html"), "utf8");
+    const head = /<head>([\s\S]*?)<\/head>/.exec(html)?.[1] ?? html;
+    // Before every stylesheet and module, so it runs before anything is painted.
+    expect(head.trimStart().startsWith(`<script src="${THEME_URL}"></script>`)).toBe(true);
+    // Every script has a source: none is inline, which the policy forbids.
+    for (const tag of html.match(/<script\b[^>]*>[\s\S]*?<\/script>/g) ?? []) {
+      expect(tag).toMatch(/^<script\b[^>]*\ssrc="\/[^"]*"[^>]*><\/script>$/);
+    }
+    expect(readFileSync(path.join(root, `dist${THEME_URL}`), "utf8")).toBe(
+      themeScript(PREFERENCES_KEY),
+    );
+  });
+
+  it("keeps the theme script offline with the rest of the build", () => {
+    const worker = readFileSync(path.join(root, "dist/sw.js"), "utf8");
+    expect(worker).toContain(JSON.stringify(THEME_URL));
   });
 
   it("copies the SDK's assets to the path the app serves them from", () => {
@@ -100,6 +128,27 @@ describe("editorApp", () => {
       expect(worker.headers.get("content-type")).toBe("text/javascript");
       const outside = await fetch(`${base}/sdk/1.2.3/..%2Fmain.js`);
       expect(await outside.text()).not.toContain("document.title");
+    } finally {
+      await server.close();
+    }
+  });
+
+  it("serves the theme script from the dev server at the build's path", async () => {
+    const server = await createServer({
+      root,
+      logLevel: "silent",
+      configFile: false,
+      server: { port: 0, host: "127.0.0.1" },
+      plugins: [editorApp({ preferencesKey: PREFERENCES_KEY })],
+    });
+    try {
+      await server.listen();
+      const base = String(server.resolvedUrls?.local[0]).replace(/\/$/, "");
+      const script = await fetch(`${base}${THEME_URL}`);
+      expect(await script.text()).toBe(themeScript(PREFERENCES_KEY));
+      expect(script.headers.get("content-type")).toBe("text/javascript");
+      const page = await (await fetch(`${base}/`)).text();
+      expect(page).toContain(`<script src="${THEME_URL}"></script>`);
     } finally {
       await server.close();
     }

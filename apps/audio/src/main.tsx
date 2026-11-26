@@ -3,7 +3,13 @@ import "@hussmartinez/ui/styles.css";
 import "@hussmartinez/audio-sdk/styles.css";
 import "virtual:theme.css";
 import "@editor-apps/app-shell/styles.css";
-import { AppShell, startApp, type UnsavedAfter, useEditorEvents } from "@editor-apps/app-shell";
+import {
+  AppShell,
+  startApp,
+  type UnsavedAfter,
+  useEditorEvents,
+  useEditorPreferenceProps,
+} from "@editor-apps/app-shell";
 import type { AudioSessionEvent } from "@hussmartinez/audio-sdk";
 import { AudioEditor } from "@hussmartinez/audio-sdk/react";
 import { AdArt } from "./AdArt.tsx";
@@ -37,11 +43,13 @@ const unsavedAfter: UnsavedAfter<AudioSessionEvent> = ({ type }) => {
 
 /**
  * audio-sdk's `AudioEditor` in the shared shell (docs/adr/0002). Its worker
- * comes from the app's own origin (vite.config.ts), and its anonymous
- * events go to the app's analytics (docs/adr/0005) and to the leave guard.
+ * comes from the app's own origin (vite.config.ts), its anonymous events
+ * go to the app's analytics (docs/adr/0005) and to the leave guard, and
+ * its preferences are kept on the device (docs/adr/0010).
  */
 function App() {
   const editor = useEditorEvents(unsavedAfter);
+  const preferences = useEditorPreferenceProps();
   return (
     <AppShell
       title={appConfig.title}
@@ -49,7 +57,12 @@ function App() {
       unsaved={editor.unsaved}
       ad={<AdArt />}
     >
-      <AudioEditor className="app-editor" assetsUrl={__SDK_ASSETS_URL__} onEvent={editor.onEvent} />
+      <AudioEditor
+        className="app-editor"
+        assetsUrl={__SDK_ASSETS_URL__}
+        onEvent={editor.onEvent}
+        {...preferences}
+      />
     </AppShell>
   );
 }

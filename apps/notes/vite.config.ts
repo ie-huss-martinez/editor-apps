@@ -1,3 +1,4 @@
+import { preferencesKey } from "@editor-apps/app-shell/preferences-key";
 import {
   editorApp,
   posthogPolicy,
@@ -21,6 +22,8 @@ export default defineConfig(({ mode }) => ({
     // (docs/adr/0009).
     editorApp({
       canonicalUrl: appConfig.url,
+      // The theme chosen in the editor, on the page before first paint (docs/adr/0010).
+      preferencesKey: preferencesKey(appConfig.app),
       policy: {
         wasm: true,
         inlineMedia: true,

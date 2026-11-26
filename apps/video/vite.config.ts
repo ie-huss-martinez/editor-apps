@@ -1,3 +1,4 @@
+import { preferencesKey } from "@editor-apps/app-shell/preferences-key";
 import {
   editorApp,
   posthogPolicy,
@@ -16,6 +17,8 @@ export default defineConfig(({ mode }) => ({
     // frames and plays media it holds in the page, as blob: and data: URLs.
     editorApp({
       canonicalUrl: appConfig.url,
+      // The theme chosen in the editor, on the page before first paint (docs/adr/0010).
+      preferencesKey: preferencesKey(appConfig.app),
       policy: {
         inlineImages: true,
         inlineMedia: true,

@@ -1,7 +1,14 @@
 import { createAnalytics } from "@editor-apps/analytics";
+import type { EditorPreferences } from "@hussmartinez/ui";
 import { type ReactNode, StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { AnalyticsContext } from "./analytics.ts";
+import {
+  createPreferencesStore,
+  PreferencesContext,
+  shellDefaultPreferences,
+} from "./preferences.ts";
+import { preferencesKey } from "./preferences-key.ts";
 
 export interface StartOptions {
   /** The app's name, which every analytics event carries as `app` (docs/adr/0005). */
@@ -18,6 +25,12 @@ export interface StartOptions {
    * service worker to register, as on the dev server, nothing happens.
    */
   readonly offline?: boolean;
+  /**
+   * The app's editor preferences for a first visit, over the shell's Easy
+   * mode (docs/adr/0010), such as `{ toolsLayout: "dock" }`. Every field
+   * left out is ui's default.
+   */
+  readonly defaultPreferences?: Partial<EditorPreferences>;
 }
 
 /** The service worker's address, at the root so it serves the whole app. */
@@ -25,8 +38,10 @@ const SERVICE_WORKER = "/sw.js";
 
 /**
  * Starts an app the same way in every app: its analytics, with one page
- * view per load, then the app, in React's strict mode, with the analytics
- * in context for {@link useAnalytics} and the error boundary.
+ * view per load, and its editor preferences, kept in `localStorage` under
+ * the app's key (docs/adr/0010), then the app, in React's strict mode, with
+ * both in context for {@link useAnalytics}, {@link useEditorPreferenceProps}
+ * and the error boundary.
  */
 export function startApp({
   app,
@@ -34,14 +49,21 @@ export function startApp({
   render,
   root,
   offline = false,
+  defaultPreferences,
 }: StartOptions): void {
   const analytics = createAnalytics({ app, key, host });
   analytics.pageView();
+  const preferences = createPreferencesStore({
+    key: preferencesKey(app),
+    defaults: { ...shellDefaultPreferences, ...defaultPreferences },
+  });
   const element = root ?? document.getElementById("root");
   if (!element) throw new Error("The page has no #root element.");
   createRoot(element).render(
     <StrictMode>
-      <AnalyticsContext.Provider value={analytics}>{render()}</AnalyticsContext.Provider>
+      <AnalyticsContext.Provider value={analytics}>
+        <PreferencesContext.Provider value={preferences}>{render()}</PreferencesContext.Provider>
+      </AnalyticsContext.Provider>
     </StrictMode>,
   );
   if (offline && "serviceWorker" in navigator) {

@@ -1,13 +1,16 @@
 import { readFile } from "node:fs/promises";
 import { createRequire } from "node:module";
+import { preferencesKey } from "@editor-apps/app-shell/preferences-key";
 import {
   analyticsOriginUnderTest,
   expect,
   expectAnalytics,
+  expectEditorFillsTheScreen,
   expectPolicyOrigins,
   expectSdkAssets,
   expectSecurityHeaders,
   expectShellLook,
+  expectThemeBeforeFirstPaint,
   expectThirdPartyLicenses,
   leavingAsks,
   test,
@@ -58,10 +61,16 @@ test("an image opens, is edited and downloads as PNG, guarded until then, with t
     timeout: 30_000,
   });
 
+  // A first visit is in Easy mode: the app's preferences reach the editor.
+  await expect(page.getByRole("radio", { name: "Easy" })).toBeChecked();
+
   // The leave guard: off for an untouched image, on after an edit, still on
   // once the export is built, and off once Download is pressed.
   expect(await leavingAsks(page)).toBe(false);
-  await page.getByRole("button", { name: "Rotate right", exact: true }).click();
+  await page
+    .getByRole("navigation", { name: "Tools" })
+    .getByRole("button", { name: /^Rotate right\b/ })
+    .click();
   await expect.poll(() => leavingAsks(page)).toBe(true);
 
   await page.getByRole("button", { name: "Export", exact: true }).click();
@@ -97,6 +106,39 @@ test("both of the SDK's workers are served from the app's own origin, under its 
     expect(response.status(), worker).toBe(200);
     expect(response.headers()["content-type"], worker).toMatch(/javascript/);
   }
+});
+
+test("the editor's preferences are kept on the device, and its theme is the page's", async ({
+  page,
+}) => {
+  const key = preferencesKey(appConfig.app);
+  const kept = () => page.evaluate((name) => JSON.parse(localStorage.getItem(name) ?? "null"), key);
+  await page.emulateMedia({ colorScheme: "light" });
+  await page.goto("/");
+  await expect(page.getByRole("radio", { name: "Easy" })).toBeChecked();
+  // Nothing is written until the person chooses something.
+  expect(await kept()).toBeNull();
+
+  await page.getByRole("radio", { name: "Advanced" }).click();
+  await page.getByRole("button", { name: "Dark theme" }).click();
+  // The shell around the editor follows its theme (docs/adr/0010).
+  await expect(page.locator("html")).toHaveAttribute("data-hm-theme", "dark");
+  expect(await kept()).toMatchObject({ mode: "advanced", theme: "dark" });
+
+  await page.reload();
+  await expect(page.getByRole("radio", { name: "Advanced" })).toBeChecked();
+  await expect(page.locator("html")).toHaveAttribute("data-hm-theme", "dark");
+});
+
+test("the page has the theme chosen in the editor before it's painted", async ({ page }) => {
+  await expectThemeBeforeFirstPaint(page, preferencesKey(appConfig.app));
+});
+
+test("the editor has the screen under the header, on a desktop and a phone", async ({ page }) => {
+  await page.goto("/");
+  await expectEditorFillsTheScreen(page);
+  await page.setViewportSize({ width: 390, height: 844 });
+  await expectEditorFillsTheScreen(page);
 });
 
 test("the shell looks as committed, in light and dark, and skips to the editor", async ({

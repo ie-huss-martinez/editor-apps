@@ -16,7 +16,7 @@
     "@editor-apps/app-shell": "workspace:*",
     "@hussmartinez/sdk-core": "catalog:",
     "@hussmartinez/ui": "catalog:",
-    "@hussmartinez/video-sdk": "0.10.6",
+    "@hussmartinez/video-sdk": "0.11.0",
     "react": "catalog:",
     "react-dom": "catalog:"
   },

@@ -1,11 +1,14 @@
+import { preferencesKey } from "@editor-apps/app-shell/preferences-key";
 import {
   analyticsOriginUnderTest,
   expect,
   expectAnalytics,
+  expectEditorFillsTheScreen,
   expectPolicyOrigins,
   expectSdkAssets,
   expectSecurityHeaders,
   expectShellLook,
+  expectThemeBeforeFirstPaint,
   expectThirdPartyLicenses,
   leavingAsks,
   test,
@@ -106,6 +109,10 @@ test("a notebook has the whole screen, keeps what's written, and never asks befo
     .getByRole("button", { name: "Create" })
     .click();
   await expect(page.locator(".hm-notes-page").first()).toBeVisible();
+  // A first visit is in Easy mode, with the tools in a dock over the page:
+  // the app's preferences reach the notebook (docs/adr/0010).
+  await expect(page.getByRole("radio", { name: "Easy" })).toBeChecked();
+  await expect(page.locator('[data-hm-layout="dock"]')).toHaveCount(1);
 
   // The whole screen: the editor from edge to edge, no ad beside the page,
   // and the page's one h1 still there for assistive technology.
@@ -183,6 +190,17 @@ test("opens without a network once it has been visited", async ({
   } finally {
     await context.setOffline(false);
   }
+});
+
+test("the page has the theme chosen in the editor before it's painted", async ({ page }) => {
+  await expectThemeBeforeFirstPaint(page, preferencesKey(appConfig.app));
+});
+
+test("the editor has the screen under the header, on a desktop and a phone", async ({ page }) => {
+  await page.goto("/");
+  await expectEditorFillsTheScreen(page);
+  await page.setViewportSize({ width: 390, height: 844 });
+  await expectEditorFillsTheScreen(page);
 });
 
 test("the shell looks as committed, in light and dark, and skips to the editor", async ({

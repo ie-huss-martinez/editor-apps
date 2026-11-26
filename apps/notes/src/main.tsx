@@ -3,7 +3,13 @@ import "@hussmartinez/ui/styles.css";
 import "@hussmartinez/notes-sdk/styles.css";
 import "virtual:theme.css";
 import "@editor-apps/app-shell/styles.css";
-import { AppShell, startApp, type UnsavedAfter, useEditorEvents } from "@editor-apps/app-shell";
+import {
+  AppShell,
+  startApp,
+  type UnsavedAfter,
+  useEditorEvents,
+  useEditorPreferenceProps,
+} from "@editor-apps/app-shell";
 import type { NotesLibraryEvent } from "@hussmartinez/notes-sdk";
 import {
   NotesEditor,
@@ -31,11 +37,13 @@ const KEEPING = new Set<NotesLibraryEvent["type"]>([
  * notes-sdk's `NotesEditor` in the shared shell (docs/adr/0002). The
  * library shows the header and the ad slot; an open notebook has the whole
  * screen, with no ad beside the page being written on (docs/adr/0008). The
- * SDK's PDF engine runs from the app's own origin (vite.config.ts), and its
- * anonymous events go to the app's analytics (docs/adr/0005).
+ * SDK's PDF engine runs from the app's own origin (vite.config.ts), its
+ * anonymous events go to the app's analytics (docs/adr/0005), and its
+ * preferences are kept on the device (docs/adr/0010).
  */
 function App() {
   const { onEvent: forward } = useEditorEvents(savedAsYouWrite);
+  const preferences = useEditorPreferenceProps();
   const handle = useRef<NotesEditorHandle>(null);
   const [view, setView] = useState<NotesEditorView>({ view: "library" });
   const asked = useRef(false);
@@ -68,6 +76,7 @@ function App() {
         assetsUrl={__SDK_ASSETS_URL__}
         onEvent={onEvent}
         onViewChange={setView}
+        {...preferences}
       />
     </AppShell>
   );
@@ -81,4 +90,7 @@ startApp({
   },
   render: () => <App />,
   offline: true,
+  // The notebook's tools float in a dock over the page, as in the
+  // handwriting apps people know; ui's default is a sidebar (docs/adr/0010).
+  defaultPreferences: { toolsLayout: "dock" },
 });

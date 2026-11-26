@@ -1,3 +1,4 @@
+import { preferencesKey } from "@editor-apps/app-shell/preferences-key";
 import {
   editorApp,
   posthogPolicy,
@@ -17,7 +18,8 @@ export default defineConfig(({ mode }) => ({
     // origin. It needs nothing else opened in the policy.
     editorApp({
       canonicalUrl: appConfig.url,
-      // PostHog's host in connect-src only when the build has a key (docs/adr/0005).
+      // The theme chosen in the editor, on the page before first paint (docs/adr/0010).
+      preferencesKey: preferencesKey(appConfig.app),
       // PostHog's host in connect-src only when the build has a key (docs/adr/0005).
       policy: { analytics: posthogPolicy(mode, import.meta.dirname, appConfig.analyticsHost) },
       sdkAssets: sdkPackageAssets("@hussmartinez/audio-sdk", import.meta.url),

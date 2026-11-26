@@ -384,6 +384,99 @@ export async function expectShellLook(page: Page): Promise<void> {
 }
 
 /**
+ * The page's theme before first paint (docs/adr/0010): with a theme kept in
+ * the app's editor preferences, `<html>` already has it when the browser
+ * reaches `<body>`, before anything can be painted, and the shell's header
+ * is drawn in it whatever the system's colour scheme. With `system`, or a
+ * kept value that's no use, the page follows the system. The `problems`
+ * fixture fails the test if the script breaks the policy or throws.
+ *
+ * @param key - The app's `localStorage` key, from app-shell's `preferencesKey`.
+ */
+export async function expectThemeBeforeFirstPaint(page: Page, key: string): Promise<void> {
+  // What <html> said when <body> arrived: nothing in it is painted before.
+  await page.addInitScript(() => {
+    new MutationObserver((_, observer) => {
+      if (!document.body) return;
+      observer.disconnect();
+      document.documentElement.dataset.themeAtBody =
+        document.documentElement.getAttribute("data-hm-theme") ?? "none";
+    }).observe(document, { childList: true, subtree: true });
+  });
+  const header = page.locator("header").first();
+  const background = () => header.evaluate((element) => getComputedStyle(element).backgroundColor);
+  const load = async (kept: string | null) => {
+    await page.evaluate(
+      ({ name, value }) => {
+        if (value === null) localStorage.removeItem(name);
+        else localStorage.setItem(name, value);
+      },
+      { name: key, value: kept },
+    );
+    await page.reload();
+    await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
+    return page.evaluate(() => document.documentElement.dataset.themeAtBody);
+  };
+
+  await page.goto("/");
+  const system: Partial<Record<"light" | "dark", string>> = {};
+  for (const scheme of ["light", "dark"] as const) {
+    await page.emulateMedia({ colorScheme: scheme });
+    expect(await load(null), "nothing kept").toBe("none");
+    system[scheme] = await background();
+  }
+  expect(system.light, "the header in light and dark").not.toBe(system.dark);
+
+  // A theme kept against the system's: set before <body>, and the shell follows it.
+  for (const [scheme, kept] of [
+    ["light", "dark"],
+    ["dark", "light"],
+  ] as const) {
+    await page.emulateMedia({ colorScheme: scheme });
+    expect(await load(JSON.stringify({ theme: kept })), `${kept} kept`).toBe(kept);
+    expect(await background(), `the header in ${kept}`).toBe(system[kept]);
+  }
+
+  await page.emulateMedia({ colorScheme: "dark" });
+  for (const kept of [JSON.stringify({ theme: "system" }), JSON.stringify({ theme: 1 }), "{oops"]) {
+    expect(await load(kept), `${kept} kept`).toBe("none");
+    expect(await background(), `the header for ${kept}`).toBe(system.dark);
+  }
+  await page.evaluate((name) => localStorage.removeItem(name), key);
+}
+
+/**
+ * The editor has the height the shell's header leaves (sdk-core ADR 0067):
+ * it starts under the header, reaches the main area's foot, and the page
+ * itself doesn't scroll, at the page's current viewport. The editor's frame
+ * needs that definite height to lay out its bars, panels and stage.
+ */
+export async function expectEditorFillsTheScreen(page: Page): Promise<void> {
+  const viewport = page.viewportSize();
+  if (!viewport) throw new Error("The page has no viewport.");
+  const editor = page.locator(".app-shell-main > .app-editor");
+  await expect(editor).toBeVisible();
+  const sizes = await editor.evaluate((element) => {
+    const main = element.parentElement as HTMLElement;
+    const padding = Number.parseFloat(getComputedStyle(main).paddingBlockEnd);
+    const header = document.querySelector(".app-shell-header")?.getBoundingClientRect();
+    return {
+      editor: element.getBoundingClientRect().toJSON() as DOMRect,
+      mainBottom: main.getBoundingClientRect().bottom - padding,
+      headerBottom: header?.bottom ?? 0,
+      scrolls: document.documentElement.scrollHeight > window.innerHeight,
+    };
+  });
+  expect(sizes.scrolls, "the page scrolls").toBe(false);
+  expect(sizes.editor.top, "the editor's top").toBeGreaterThanOrEqual(sizes.headerBottom);
+  expect(Math.abs(sizes.editor.bottom - sizes.mainBottom), "the editor's foot").toBeLessThan(1);
+  expect(sizes.editor.bottom, "the editor's foot").toBeLessThanOrEqual(viewport.height);
+  expect(sizes.editor.height, "the editor's height").toBeGreaterThan(
+    (viewport.height - sizes.headerBottom) * 0.9,
+  );
+}
+
+/**
  * Whether leaving the page now would make the browser ask first: it
  * dispatches a cancelable `beforeunload`, as the browser does, and reads
  * whether the shell's leave guard cancelled it (docs/adr/0002). Poll it,

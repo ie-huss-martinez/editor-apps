@@ -2,6 +2,7 @@
 import { act } from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { useAnalytics } from "./analytics.ts";
+import { useEditorPreferenceProps } from "./preferences.ts";
 
 (globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
 
@@ -9,16 +10,23 @@ const analytics = { pageView: vi.fn(), editorEvent: vi.fn(), event: vi.fn() };
 const createAnalytics = vi.fn(() => analytics);
 vi.mock("@editor-apps/analytics", () => ({ createAnalytics }));
 
-/** What the app saw from useAnalytics(). */
-const seen: { value?: unknown } = {};
+/** What the app saw from useAnalytics() and useEditorPreferenceProps(). */
+const seen: { value?: unknown; preferences?: unknown } = {};
 
 function App() {
   seen.value = useAnalytics();
   return <p>app</p>;
 }
 
+function Editor() {
+  seen.preferences = useEditorPreferenceProps().preferences;
+  return null;
+}
+
 afterEach(() => {
   document.body.innerHTML = "";
+  localStorage.clear();
+  document.documentElement.removeAttribute("data-hm-theme");
   vi.clearAllMocks();
 });
 
@@ -118,5 +126,25 @@ describe("startApp", () => {
     } finally {
       Reflect.deleteProperty(navigator, "serviceWorker");
     }
+  });
+
+  it("keeps the editor preferences under the app's key, from Easy mode and the app's defaults", async () => {
+    const { startApp } = await import("./start.tsx");
+    const root = document.createElement("div");
+    document.body.append(root);
+    localStorage.setItem("editor-preferences:notes", JSON.stringify({ theme: "dark" }));
+
+    await act(async () =>
+      startApp({
+        app: "notes",
+        analytics: { key: undefined, host: "https://ph.example" },
+        render: () => <Editor />,
+        root,
+        defaultPreferences: { toolsLayout: "dock" },
+      }),
+    );
+
+    expect(seen.preferences).toMatchObject({ theme: "dark", mode: "easy", toolsLayout: "dock" });
+    expect(document.documentElement.getAttribute("data-hm-theme")).toBe("dark");
   });
 });

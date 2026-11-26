@@ -5,6 +5,7 @@ import { loadEnv, type Plugin } from "vite";
 import { headersFile, httpsOrigin, type PolicyOptions, securityHeaders } from "./headers.ts";
 import { packageRoot, thirdPartyLicenses } from "./licenses.ts";
 import { writeServiceWorker } from "./offline.ts";
+import { themeScript, themeScriptPath } from "./theme-script.ts";
 
 /**
  * What an app tells the build about itself. Everything else is the same in
@@ -35,6 +36,15 @@ export interface EditorAppOptions {
    * included. Register it with `startApp`'s `offline`.
    */
   readonly offline?: boolean;
+  /**
+   * The `localStorage` key the shell keeps the editor's preferences under,
+   * from app-shell's `preferencesKey` (docs/adr/0010). The build writes a
+   * small script that sets the theme chosen there on `<html>`, and loads it
+   * first in the page's `<head>`, so the page is painted in that theme from
+   * the start. It's served from the app's own origin, so the policy needs
+   * nothing new.
+   */
+  readonly preferencesKey?: string;
 }
 
 /** The dev server's content types for an SDK's assets. Production's come from Cloudflare. */
@@ -66,6 +76,9 @@ export function editorApp(options: EditorAppOptions = {}): Plugin[] {
   // The SDK's self-hosted assets ship without passing through the bundle.
   // Absolute first: a relative directory has no node_modules to find.
   const sdkRoot = assets ? packageRoot(path.resolve(assets.from, "x")) : undefined;
+  const theme =
+    options.preferencesKey === undefined ? undefined : themeScript(options.preferencesKey);
+  const themeUrl = theme === undefined ? undefined : themeScriptPath(theme);
 
   const app: Plugin = {
     name: "editor-apps:app",
@@ -77,8 +90,16 @@ export function editorApp(options: EditorAppOptions = {}): Plugin[] {
       // Where the app passes as its SDK's `assetsUrl`. Empty without assets.
       define: { __SDK_ASSETS_URL__: JSON.stringify(assets?.url ?? "") },
     }),
-    // The dev server serves the SDK's assets at the same path as production.
+    // The dev server serves the theme script and the SDK's assets at the
+    // same paths as production.
     configureServer(server) {
+      if (theme !== undefined) {
+        server.middlewares.use((request, response, next) => {
+          if ((request.url ?? "").split("?")[0] !== themeUrl) return next();
+          response.setHeader("Content-Type", "text/javascript");
+          response.end(theme);
+        });
+      }
       if (!assets) return;
       server.middlewares.use((request, response, next) => {
         let pathname: string;
@@ -102,14 +123,30 @@ export function editorApp(options: EditorAppOptions = {}): Plugin[] {
       });
     },
     transformIndexHtml() {
-      if (!options.canonicalUrl) return [];
-      const { href } = new URL(options.canonicalUrl);
-      return [{ tag: "link", attrs: { rel: "canonical", href }, injectTo: "head" }];
+      return [
+        // First in the head, and blocking, so it runs before the stylesheets
+        // apply and before anything is painted.
+        ...(themeUrl === undefined
+          ? []
+          : [{ tag: "script", attrs: { src: themeUrl }, injectTo: "head-prepend" as const }]),
+        ...(options.canonicalUrl
+          ? [
+              {
+                tag: "link",
+                attrs: { rel: "canonical", href: new URL(options.canonicalUrl).href },
+                injectTo: "head" as const,
+              },
+            ]
+          : []),
+      ];
     },
     configResolved(config) {
       outDir = path.resolve(config.root, config.build.outDir);
     },
     generateBundle() {
+      if (theme !== undefined && themeUrl !== undefined) {
+        this.emitFile({ type: "asset", fileName: themeUrl.slice(1), source: theme });
+      }
       this.emitFile({
         type: "asset",
         fileName: "_headers",

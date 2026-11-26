@@ -1,3 +1,4 @@
+import { preferencesKey } from "@editor-apps/app-shell/preferences-key";
 import {
   editorApp,
   posthogPolicy,
@@ -18,6 +19,8 @@ export default defineConfig(({ mode }) => ({
     // host is in connect-src only when the build has a key (docs/adr/0005).
     editorApp({
       canonicalUrl: appConfig.url,
+      // The theme chosen in the editor, on the page before first paint (docs/adr/0010).
+      preferencesKey: preferencesKey(appConfig.app),
       policy: {
         wasm: true,
         inlineImages: true,

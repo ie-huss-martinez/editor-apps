@@ -1,6 +1,6 @@
 # 0002. One app shell, so the four apps look and behave alike
 
-- **Status:** Accepted, amended 2026-11-19 (twice)
+- **Status:** Accepted, amended 2026-11-19 (twice); the theme's "following the system" superseded by [ADR 0010](0010-editor-preferences-and-the-page-theme.md)
 - **Date:** 2026-11-18
 
 ## Context

@@ -1,12 +1,15 @@
 import { readFile } from "node:fs/promises";
+import { preferencesKey } from "@editor-apps/app-shell/preferences-key";
 import {
   analyticsOriginUnderTest,
   expect,
   expectAnalytics,
+  expectEditorFillsTheScreen,
   expectPolicyOrigins,
   expectSdkAssets,
   expectSecurityHeaders,
   expectShellLook,
+  expectThemeBeforeFirstPaint,
   expectThirdPartyLicenses,
   leavingAsks,
   test,
@@ -56,6 +59,8 @@ test("a video opens and downloads, guarded until then, with the SDK's workers fr
     buffer: await readFile(fixture),
   });
   await expect(page.getByRole("listbox", { name: "Clips" }).getByRole("option")).toHaveCount(1);
+  // A first visit is in Easy mode: the app's preferences reach the editor.
+  await expect(page.getByRole("radio", { name: "Easy" })).toBeChecked();
 
   // The leave guard: adding a clip is already an edit, so it's on. It stays
   // on once the export is built, and it's off once Download is pressed.
@@ -100,6 +105,17 @@ function hasVideoTrack(file: Buffer): boolean {
   }
   return false;
 }
+
+test("the page has the theme chosen in the editor before it's painted", async ({ page }) => {
+  await expectThemeBeforeFirstPaint(page, preferencesKey(appConfig.app));
+});
+
+test("the editor has the screen under the header, on a desktop and a phone", async ({ page }) => {
+  await page.goto("/");
+  await expectEditorFillsTheScreen(page);
+  await page.setViewportSize({ width: 390, height: 844 });
+  await expectEditorFillsTheScreen(page);
+});
 
 test("the shell looks as committed, in light and dark, and skips to the editor", async ({
   page,

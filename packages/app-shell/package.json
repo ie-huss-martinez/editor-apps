@@ -6,6 +6,7 @@
   "description": "The page around every app's editor (docs/adr/0002): header, main landmark, ui's providers, the error boundary and analytics start-up. Never published.",
   "exports": {
     ".": "./src/index.ts",
+    "./preferences-key": "./src/preferences-key.ts",
     "./styles.css": "./src/styles.css"
   },
   "scripts": {
@@ -17,7 +18,7 @@
   },
   "peerDependencies": {
     "@hussmartinez/sdk-core": ">=0.4.4 <0.5.0",
-    "@hussmartinez/ui": ">=0.16.0 <0.17.0",
+    "@hussmartinez/ui": ">=0.17.0 <0.18.0",
     "react": "catalog:",
     "react-dom": "catalog:"
   },
