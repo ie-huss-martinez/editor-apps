@@ -1,6 +1,5 @@
 import { AnnouncerProvider, UiMessagesProvider, VisuallyHidden } from "@hussmartinez/ui/react";
 import type { ReactNode } from "react";
-import { AdSlot } from "./AdSlot.tsx";
 import { ErrorBoundary } from "./ErrorBoundary.tsx";
 import { useLeaveGuard } from "./leave-guard.ts";
 import { messages } from "./messages.ts";
@@ -22,28 +21,27 @@ export interface AppShellProps {
    */
   readonly unsaved?: boolean;
   /**
-   * The ad slot's placeholder art (docs/adr/0007). Without it there's no
-   * slot, and the editor takes the whole width.
-   */
-  readonly ad?: ReactNode;
-  /**
    * The editor takes the whole screen, as an open notebook does
    * (docs/adr/0008): the header is hidden on screen but stays for
-   * assistive technology, with the page's one `<h1>`, the main area has no
-   * margin, and there's no ad slot, whatever `ad` holds.
+   * assistive technology, with the page's one `<h1>`, and the main area has
+   * no margin.
    */
   readonly fullScreen?: boolean;
-  /** The SDK's editor, which fills the main area. Give it the class `app-editor`. */
+  /**
+   * The SDK's editor, which fills the main area. Give it the class
+   * `app-editor`, and the slot from `useAdSlot` as its `propertiesFooter`
+   * (docs/adr/0011).
+   */
   readonly children: ReactNode;
 }
 
 /**
  * The page around every app's editor (docs/adr/0002): ui's providers, a
  * skip link, a header with the app's name as the only `<h1>`, the `<main>`
- * landmark at full height, the shared error boundary around the editor, and
- * the leave guard while there are unsaved edits, and the ad slot beside the
- * editor when the app gives its art. With `fullScreen`, the editor has the
- * whole screen. Import
+ * landmark at full height and full width, the shared error boundary around
+ * the editor, and the leave guard while there are unsaved edits. The ad slot
+ * is in the editor's own column (docs/adr/0011). With `fullScreen`, the
+ * editor has the whole screen. Import
  * `@editor-apps/app-shell/styles.css` after ui's and the SDK's stylesheets.
  */
 export function AppShell({
@@ -51,7 +49,6 @@ export function AppShell({
   tagline,
   status,
   unsaved = false,
-  ad,
   fullScreen = false,
   children,
 }: AppShellProps) {
@@ -71,13 +68,10 @@ export function AppShell({
             {messages.t("shell.skip")}
           </a>
           {fullScreen ? <VisuallyHidden as="div">{header}</VisuallyHidden> : header}
-          <div className="app-shell-body">
-            {/* Focusable by the skip link only, so it isn't a tab stop. */}
-            <main id="app-shell-main" className="app-shell-main" tabIndex={-1}>
-              <ErrorBoundary>{children}</ErrorBoundary>
-            </main>
-            {ad !== undefined && !fullScreen && <AdSlot>{ad}</AdSlot>}
-          </div>
+          {/* Focusable by the skip link only, so it isn't a tab stop. */}
+          <main id="app-shell-main" className="app-shell-main" tabIndex={-1}>
+            <ErrorBoundary>{children}</ErrorBoundary>
+          </main>
         </div>
       </AnnouncerProvider>
     </UiMessagesProvider>

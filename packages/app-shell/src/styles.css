@@ -82,14 +82,8 @@ body {
   white-space: nowrap;
 }
 
-/* The editor, and the ad slot beside it when there is one. */
-.app-shell-body {
-  display: flex;
-  min-block-size: 0;
-}
-
+/* The editor, at the full width under the header. */
 .app-shell-main {
-  flex: 1;
   display: flex;
   flex-direction: column;
   min-block-size: 0;
@@ -101,8 +95,8 @@ body {
 
 /*
  * The whole screen for the editor (docs/adr/0008): the header is hidden
- * (ui's VisuallyHidden takes it out of the flow), so the body is the only
- * row, and the editor meets the screen's edges.
+ * (ui's VisuallyHidden takes it out of the flow), so the main area is the
+ * only row, and the editor meets the screen's edges.
  */
 .app-shell-full {
   grid-template-rows: minmax(0, 1fr);
@@ -131,21 +125,13 @@ body {
 }
 
 /*
- * The ad slot (docs/adr/0007): a fixed 160 × 600 box, the IAB's wide
- * skyscraper, so nothing moves when a real ad arrives. Shown only where the
- * editor keeps room: at least 1280 pixels wide and 720 high.
+ * The ad slot (docs/adr/0007, docs/adr/0011): a fixed 160 × 600 box, the
+ * IAB's wide skyscraper, so nothing moves when a real ad arrives. It sits in
+ * the editor's properties column, which centres it; `useAdSlot` renders it
+ * only on viewports of at least 1280 × 720.
  */
 .app-shell-ad {
-  display: none;
-}
-
-@media (min-width: 1280px) and (min-height: 720px) {
-  .app-shell-ad {
-    display: block;
-    flex: none;
-    padding-block: var(--hm-inset-normal);
-    padding-inline-end: var(--hm-inset-normal);
-  }
+  flex: none;
 }
 
 .app-shell-ad-box {

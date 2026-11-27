@@ -1,13 +1,17 @@
 import { readFile } from "node:fs/promises";
+import { preferencesKey } from "@editor-apps/app-shell/preferences-key";
 import {
   analyticsOriginUnderTest,
   expect,
+  expectAdSlotInTheFrame,
   expectAnalytics,
+  expectEditorFillsTheScreen,
   expectLeavePrompt,
   expectPolicyOrigins,
   expectSdkAssets,
   expectSecurityHeaders,
   expectShellLook,
+  expectThemeBeforeFirstPaint,
   expectThirdPartyLicenses,
   leavingAsks,
   test,
@@ -53,22 +57,22 @@ test("a PDF opens, is edited and downloads, guarded until then, with the SDK's a
   // The app's own status line, fed by the SDK's change events.
   await expect(page.locator("header output")).toHaveText("blank.pdf · 1 page");
 
+  // A first visit is in Easy mode: the app's preferences reach the editor.
+  await expect(page.getByRole("radio", { name: "Easy" })).toBeChecked();
+
   // The leave guard: off for an untouched document, on after an edit, and
   // off again once the edited document is downloaded.
   expect(await leavingAsks(page)).toBe(false);
   await page
-    .getByRole("toolbar", { name: "PDF tools" })
-    .getByRole("button", { name: "Rotate right" })
+    .getByRole("navigation", { name: "Tools" })
+    .getByRole("button", { name: /^Rotate right\b/ })
     .click();
   await expect.poll(() => leavingAsks(page)).toBe(true);
   // The browser's own prompt, once: dismissing it keeps the page and the edit.
   await expectLeavePrompt(page);
 
   const saving = page.waitForEvent("download");
-  await page
-    .getByRole("toolbar", { name: "PDF tools" })
-    .getByRole("button", { name: "Download" })
-    .click();
+  await page.getByRole("button", { name: "Download", exact: true }).click();
   const pdf = await readFile(await (await saving).path());
   expect(pdf.toString("ascii", 0, 5)).toBe("%PDF-");
   expect(pdf.byteLength).toBeGreaterThan(100);
@@ -76,6 +80,24 @@ test("a PDF opens, is edited and downloads, guarded until then, with the SDK's a
 
   expectSdkAssets(problems, page, "@hussmartinez/pdf-sdk");
   await expectAnalytics(problems, analytics, appConfig.app);
+});
+
+test("the page has the theme chosen in the editor before it's painted", async ({ page }) => {
+  await expectThemeBeforeFirstPaint(page, preferencesKey(appConfig.app));
+});
+
+test("the editor has the screen under the header, on a desktop and a phone", async ({ page }) => {
+  await page.goto("/");
+  await expectEditorFillsTheScreen(page);
+  await page.setViewportSize({ width: 390, height: 844 });
+  await expectEditorFillsTheScreen(page);
+});
+
+test("the ad slot sits at the foot of the editor's properties column, on wide screens only", async ({
+  page,
+}) => {
+  await page.goto("/");
+  await expectAdSlotInTheFrame(page);
 });
 
 test("the shell looks as committed, in light and dark, and skips to the editor", async ({

@@ -1,12 +1,16 @@
 import { readFile } from "node:fs/promises";
+import { preferencesKey } from "@editor-apps/app-shell/preferences-key";
 import {
   analyticsOriginUnderTest,
   expect,
+  expectAdSlotInTheFrame,
   expectAnalytics,
+  expectEditorFillsTheScreen,
   expectPolicyOrigins,
   expectSdkAssets,
   expectSecurityHeaders,
   expectShellLook,
+  expectThemeBeforeFirstPaint,
   expectThirdPartyLicenses,
   leavingAsks,
   test,
@@ -74,13 +78,22 @@ test("a recording opens, is edited and downloads as WAV, guarded until then, wit
   await (await chooser).setFiles({ name: "tone.wav", mimeType: "audio/wav", buffer: recording() });
 
   // The SDK's Export tool opens its export dialog, which writes the file.
-  const exportTool = page.getByRole("toolbar").getByRole("button", { name: "Export", exact: true });
+  const exportTool = page.getByRole("button", { name: "Export", exact: true });
   await expect(exportTool).toBeEnabled({ timeout: 30_000 });
+
+  // A first visit is in Easy mode: the app's preferences reach the editor.
+  // Adding a track is an Advanced tool, so the person moves on to Advanced.
+  const easy = page.getByRole("radio", { name: "Easy" });
+  await expect(easy).toBeChecked();
+  await page.getByRole("radio", { name: "Advanced" }).click();
 
   // The leave guard: off for an untouched recording, on after an edit, still
   // on once the export is built, and off once Download is pressed.
   expect(await leavingAsks(page)).toBe(false);
-  await page.getByRole("toolbar").getByRole("button", { name: "Add track", exact: true }).click();
+  await page
+    .getByRole("navigation", { name: "Tools" })
+    .getByRole("button", { name: /^Add track\b/ })
+    .click();
   await expect.poll(() => leavingAsks(page)).toBe(true);
 
   await exportTool.click();
@@ -102,6 +115,24 @@ test("a recording opens, is edited and downloads as WAV, guarded until then, wit
 
   expectSdkAssets(problems, page, "@hussmartinez/audio-sdk");
   await expectAnalytics(problems, analytics, appConfig.app);
+});
+
+test("the page has the theme chosen in the editor before it's painted", async ({ page }) => {
+  await expectThemeBeforeFirstPaint(page, preferencesKey(appConfig.app));
+});
+
+test("the editor has the screen under the header, on a desktop and a phone", async ({ page }) => {
+  await page.goto("/");
+  await expectEditorFillsTheScreen(page);
+  await page.setViewportSize({ width: 390, height: 844 });
+  await expectEditorFillsTheScreen(page);
+});
+
+test("the ad slot sits at the foot of the editor's properties column, on wide screens only", async ({
+  page,
+}) => {
+  await page.goto("/");
+  await expectAdSlotInTheFrame(page);
 });
 
 test("the shell looks as committed, in light and dark, and skips to the editor", async ({

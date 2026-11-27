@@ -11,12 +11,24 @@
  *
  * and its `App` renders `<AppShell>` around its SDK's editor. The editor's
  * `onEvent` comes from `useEditorEvents(unsavedAfter)`, which forwards the
- * events to analytics and gives `<AppShell unsaved>` for the leave guard.
+ * events to analytics and gives `<AppShell unsaved>` for the leave guard,
+ * and its `preferences` and `onPreferencesChange` from
+ * `useEditorPreferenceProps()`, which keeps them on the device
+ * (docs/adr/0010).
  */
 
-export { AdSlot, type AdSlotProps } from "./AdSlot.tsx";
+export { AD_SLOT_MEDIA, AdSlot, type AdSlotProps, useAdSlot } from "./AdSlot.tsx";
 export { AppShell, type AppShellProps } from "./AppShell.tsx";
 export { AnalyticsContext, useAnalytics } from "./analytics.ts";
 export { ErrorBoundary } from "./ErrorBoundary.tsx";
 export { type UnsavedAfter, useEditorEvents, useLeaveGuard } from "./leave-guard.ts";
+export {
+  createPreferencesStore,
+  type EditorPreferenceProps,
+  type PreferencesStore,
+  type PreferencesStoreOptions,
+  shellDefaultPreferences,
+  useEditorPreferenceProps,
+} from "./preferences.ts";
+export { preferencesKey } from "./preferences-key.ts";
 export { type StartOptions, startApp } from "./start.tsx";

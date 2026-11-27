@@ -53,3 +53,11 @@ A fifth app for handwritten notes, on a new `notes-sdk` (ADR 0008). Two pull req
 - [x] **The decision record** (2026-11-23): ADR 0008.
 - [x] **`notes-sdk`, complete,** in sdk-core, then released (2026-11-24): sdk-core #210, published as 0.1.0.
 - [x] **The full-screen layout in `app-shell` and `apps/notes`,** installable and offline (ADR 0009) (2026-11-25): #47. The `notes-editor` Worker is connected to Workers Builds, with the same settings and build token as the other apps.
+
+## The editor frame
+
+The SDKs' UX redesign (sdk-core ADR 0067) in every app: ui 0.17, with each SDK on ui's `EditorFrame`.
+
+- [x] **Every app on the frame,** with its preferences kept on the device, Easy mode on a first visit, and the page's theme set before first paint by a script from the app's own origin (ADR 0010).
+- [x] **The ad slot in the editor's properties column,** at the foot of the frame's inline-end column, on viewports of 1280 × 720 or more (ADR 0011).
+- [x] **The notes app's slot beside the page,** in the open notebook's properties column, as Huss decided (ADR 0011).
