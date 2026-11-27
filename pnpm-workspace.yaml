@@ -15,7 +15,7 @@ catalog:
   "@commitlint/cli": 21.2.4
   "@hussmartinez/sdk-config": 0.13.8
   "@hussmartinez/sdk-core": 0.4.9
-  "@hussmartinez/ui": 0.17.0
+  "@hussmartinez/ui": 0.17.1
   "@typescript-eslint/parser": 8.73.0
   "@playwright/test": 1.65.1
   "@types/node": 24.19.2

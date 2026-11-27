@@ -14,8 +14,8 @@
   },
   "dependencies": {
     "@editor-apps/app-shell": "workspace:*",
-    "@hussmartinez/notes-sdk": "0.2.0",
-    "@hussmartinez/pdf-sdk": "0.8.0",
+    "@hussmartinez/notes-sdk": "0.2.1",
+    "@hussmartinez/pdf-sdk": "0.8.1",
     "@hussmartinez/sdk-core": "catalog:",
     "@hussmartinez/ui": "catalog:",
     "react": "catalog:",

@@ -7,6 +7,7 @@ import {
   AppShell,
   startApp,
   type UnsavedAfter,
+  useAdSlot,
   useEditorEvents,
   useEditorPreferenceProps,
 } from "@editor-apps/app-shell";
@@ -64,6 +65,7 @@ const unsavedAfter: UnsavedAfter<PdfSessionEvent> = ({ type }) => {
 function App() {
   const editor = useEditorEvents(unsavedAfter);
   const preferences = useEditorPreferenceProps();
+  const ad = useAdSlot(<AdArt />);
   const [status, setStatus] = useState<DocumentStatus>({ pageCount: 0 });
 
   // The file name comes only with `open`; edits keep it, closing clears it.
@@ -83,7 +85,6 @@ function App() {
       title={appConfig.title}
       tagline={appConfig.tagline}
       unsaved={editor.unsaved}
-      ad={<AdArt />}
       status={describe(status)}
     >
       <PdfEditor
@@ -92,6 +93,7 @@ function App() {
         filePolicy={FILE_POLICY}
         onChange={handleChange}
         onEvent={editor.onEvent}
+        propertiesFooter={ad}
         {...preferences}
       />
     </AppShell>

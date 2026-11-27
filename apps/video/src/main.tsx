@@ -7,6 +7,7 @@ import {
   AppShell,
   startApp,
   type UnsavedAfter,
+  useAdSlot,
   useEditorEvents,
   useEditorPreferenceProps,
 } from "@editor-apps/app-shell";
@@ -51,17 +52,14 @@ const unsavedAfter: UnsavedAfter<VideoSessionEvent> = ({ type, outcome }) => {
 function App() {
   const editor = useEditorEvents(unsavedAfter);
   const preferences = useEditorPreferenceProps();
+  const ad = useAdSlot(<AdArt />);
   return (
-    <AppShell
-      title={appConfig.title}
-      tagline={appConfig.tagline}
-      unsaved={editor.unsaved}
-      ad={<AdArt />}
-    >
+    <AppShell title={appConfig.title} tagline={appConfig.tagline} unsaved={editor.unsaved}>
       <VideoEditor
         className="app-editor"
         assetsUrl={__SDK_ASSETS_URL__}
         onEvent={editor.onEvent}
+        propertiesFooter={ad}
         {...preferences}
       />
     </AppShell>

@@ -14,5 +14,6 @@ Significant decisions about this repository, one per file. An accepted record's 
 | [0008](0008-a-notes-app-and-its-sdk.md)       | A notes app for handwriting, backed by a new notes SDK                 |
 | [0009](0009-offline-apps-with-a-service-worker.md) | Offline apps, with a service worker the build writes             |
 | [0010](0010-editor-preferences-and-the-page-theme.md) | Editor preferences kept on the device, and the page's theme before first paint |
+| [0011](0011-the-ad-slot-in-the-editors-column.md) | The ad slot in the editor's properties column |
 
 Each record has a status, a date, the context, the decision, the alternatives considered and the consequences.

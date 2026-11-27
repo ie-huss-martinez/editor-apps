@@ -3,6 +3,7 @@ import { preferencesKey } from "@editor-apps/app-shell/preferences-key";
 import {
   analyticsOriginUnderTest,
   expect,
+  expectAdSlotInTheFrame,
   expectAnalytics,
   expectEditorFillsTheScreen,
   expectPolicyOrigins,
@@ -125,6 +126,13 @@ test("the editor has the screen under the header, on a desktop and a phone", asy
   await expectEditorFillsTheScreen(page);
   await page.setViewportSize({ width: 390, height: 844 });
   await expectEditorFillsTheScreen(page);
+});
+
+test("the ad slot sits at the foot of the editor's properties column, on wide screens only", async ({
+  page,
+}) => {
+  await page.goto("/");
+  await expectAdSlotInTheFrame(page);
 });
 
 test("the shell looks as committed, in light and dark, and skips to the editor", async ({

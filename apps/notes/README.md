@@ -6,7 +6,7 @@ The app is a thin shell around [`@hussmartinez/notes-sdk`](https://github.com/ie
 
 ## How it differs from the other apps
 
-- **The library shows the shell's header and ad slot; an open notebook has the whole screen,** with no ad beside the page being written on. `NotesEditor`'s `onViewChange` tells the shell which view shows.
+- **The library shows the shell's header; an open notebook has the whole screen,** with no ad beside the page being written on. `NotesEditor`'s `onViewChange` tells the shell which view shows. The app has no ad slot for now: the slot lives in an editor's properties column, which the library doesn't have (docs/adr/0011).
 - **No leave guard.** The SDK saves as you write, so leaving loses nothing.
 - **It works offline and can be installed** ([ADR 0009](../../docs/adr/0009-offline-apps-with-a-service-worker.md)): the build writes a service worker that keeps every file of the build, and `public/manifest.webmanifest` makes it installable. Installing it matters most on Safari, which clears a site's storage after seven days without a visit unless it's on the home screen.
 - **It asks the browser to keep its storage** (`navigator.storage.persist()`) once the library holds something, and the library offers it too.

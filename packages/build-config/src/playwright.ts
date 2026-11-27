@@ -351,29 +351,39 @@ export async function expectThirdPartyLicenses(page: Page, packageName: string):
   expect(text).toContain(`\nreact@${installedVersion("react")}\n`);
 }
 
+/** A viewport where the ad slot is shown, and fits under an editor's top bar (docs/adr/0011). */
+export const AD_VIEWPORT = { width: 1440, height: 900 } as const;
+
 /**
  * The shell's own part of the page (docs/adr/0002) looks as committed, in
- * light and dark, its ad slot has its art and its fixed 160 × 600 size, and
- * its skip link reaches the editor. Only the header and the slot are
+ * light and dark, with the app's ad slot (docs/adr/0007) when it has one,
+ * and its skip link reaches the editor. Only the header and the slot are
  * compared, not the SDK's editor, so an SDK upgrade changes no screenshot.
+ * The page is 1440 × 900, where the slot shows in the editor's column.
  *
  * Chromium only, and only in the browser test image, where fonts and
  * rendering match CI's. Update the screenshots with `--update-snapshots`.
+ *
+ * @param options - `ad: false` for an app without a slot.
  */
-export async function expectShellLook(page: Page): Promise<void> {
+export async function expectShellLook(
+  page: Page,
+  { ad = true }: { readonly ad?: boolean } = {},
+): Promise<void> {
   base.skip(base.info().project.name !== "chromium", "The screenshots are Chromium's.");
+  await page.setViewportSize(AD_VIEWPORT);
   for (const scheme of ["light", "dark"] as const) {
     await page.emulateMedia({ colorScheme: scheme });
     await page.goto("/");
     await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
     await page.evaluate(() => document.fonts.ready);
     await expect(page.locator("header").first()).toHaveScreenshot(`shell-header-${scheme}.png`);
-    await expect(page.locator(".app-shell-ad-box")).toHaveScreenshot(`shell-ad-${scheme}.png`);
+    if (ad) {
+      await expect(page.locator(".app-shell-ad-box")).toHaveScreenshot(`shell-ad-${scheme}.png`);
+    } else {
+      await expect(page.locator(".app-shell-ad")).toHaveCount(0);
+    }
   }
-
-  // The ad slot keeps its fixed size, so nothing moves when an ad fills it.
-  const slot = await page.locator(".app-shell-ad-box").boundingBox();
-  expect(slot).toMatchObject({ width: 160, height: 600 });
 
   await page.keyboard.press("Tab");
   const skip = page.getByRole("link", { name: "Skip to the editor" });
@@ -381,6 +391,73 @@ export async function expectShellLook(page: Page): Promise<void> {
   await expect(skip).toBeInViewport();
   await page.keyboard.press("Enter");
   await expect(page.getByRole("main")).toBeFocused();
+}
+
+/**
+ * The ad slot's place (docs/adr/0007, docs/adr/0011), in every engine: on a
+ * viewport of 1440 × 900, a box of exactly 160 × 600 at the foot of the
+ * editor's properties column, which ends the frame at its inline end; on a
+ * viewport narrower than 1280 or lower than 720, no slot in the page at all.
+ * The slot is decorative: hidden from assistive technology, and inert.
+ *
+ * Call it with the page showing the editor, such as after `goto("/")` or
+ * after opening a file: it doesn't reload.
+ */
+export async function expectAdSlotInTheFrame(page: Page): Promise<void> {
+  await page.setViewportSize(AD_VIEWPORT);
+  const box = page.locator(".app-shell-ad-box");
+  await expect(box).toBeVisible();
+  const place = await box.evaluate((element) => {
+    const rect = (target: Element | null | undefined) => target?.getBoundingClientRect().toJSON();
+    const slot = element.closest(".app-shell-ad");
+    const footer = element.closest(".hm-editor-frame-properties-footer");
+    const column = element.closest(".hm-editor-frame-properties-column");
+    return {
+      box: rect(element) as DOMRect,
+      footer: rect(footer) as DOMRect | undefined,
+      column: rect(column) as DOMRect | undefined,
+      frame: rect(element.closest(".hm-editor-frame")) as DOMRect | undefined,
+      stage: rect(column?.parentElement?.querySelector(".hm-editor-frame-stage")) as
+        | DOMRect
+        | undefined,
+      hidden: slot?.getAttribute("aria-hidden"),
+      inert: slot?.hasAttribute("inert"),
+      inMain: element.closest("main") !== null,
+    };
+  });
+  // Its fixed size, so nothing moves when an ad fills it.
+  expect(place.box.width, "the slot's width").toBe(160);
+  expect(place.box.height, "the slot's height").toBe(600);
+  // In the frame's properties column, which ends the frame, after the stage.
+  expect(place.footer, "the frame's properties footer").toBeDefined();
+  expect(place.column, "the frame's properties column").toBeDefined();
+  expect(place.frame, "the editor's frame").toBeDefined();
+  expect(place.inMain, "inside the main area").toBe(true);
+  const { box: slot, column, frame, stage } = place;
+  if (!column || !frame) throw new Error("The slot isn't in an editor frame's column.");
+  expect(slot.left).toBeGreaterThanOrEqual(column.left);
+  expect(slot.right).toBeLessThanOrEqual(column.right);
+  expect(frame.right - column.right, "the column's gap to the frame's end").toBeLessThan(2);
+  if (stage)
+    expect(column.left, "the column after the stage").toBeGreaterThanOrEqual(stage.right - 1);
+  // Centred in its column, never stretched.
+  expect(Math.abs(slot.left - column.left - (column.right - slot.right))).toBeLessThan(2);
+  expect(place.hidden).toBe("true");
+  expect(place.inert).toBe(true);
+
+  // Below 1280 × 720 the host renders no slot at all (docs/adr/0007).
+  for (const viewport of [
+    { width: 1279, height: 900 },
+    { width: 1440, height: 719 },
+  ]) {
+    await page.setViewportSize(viewport);
+    await expect(
+      page.locator(".app-shell-ad"),
+      `${viewport.width} × ${viewport.height}`,
+    ).toHaveCount(0);
+  }
+  await page.setViewportSize(AD_VIEWPORT);
+  await expect(box).toBeVisible();
 }
 
 /**

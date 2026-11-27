@@ -1,6 +1,6 @@
 # 0007. The ad slot: a fixed size now, a sandboxed frame later
 
-- **Status:** Accepted
+- **Status:** Accepted; the slot's placement amended by [ADR 0011](0011-the-ad-slot-in-the-editors-column.md), which puts it in the editor's properties column
 - **Date:** 2026-11-19
 
 ## Context

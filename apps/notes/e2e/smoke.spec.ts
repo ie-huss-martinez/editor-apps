@@ -101,7 +101,9 @@ test("a notebook has the whole screen, keeps what's written, and never asks befo
     ).toBeVisible();
     return;
   }
-  await expect(page.locator(".app-shell-ad")).toBeVisible();
+  // No ad slot: the library has no editor frame to hold one, and an open
+  // notebook never has an ad beside it (docs/adr/0008, docs/adr/0011).
+  await expect(page.locator(".app-shell-ad")).toHaveCount(0);
 
   await page.getByRole("button", { name: "New notebook" }).click();
   await page
@@ -129,7 +131,6 @@ test("a notebook has the whole screen, keeps what's written, and never asks befo
   expect(await leavingAsks(page)).toBe(false);
 
   await page.getByRole("button", { name: "Back to the library" }).click();
-  await expect(page.locator(".app-shell-ad")).toBeVisible();
   await expect(page.locator(".app-shell-full")).toHaveCount(0);
 
   // Kept on the device: there after a reload.
@@ -203,8 +204,8 @@ test("the editor has the screen under the header, on a desktop and a phone", asy
   await expectEditorFillsTheScreen(page);
 });
 
-test("the shell looks as committed, in light and dark, and skips to the editor", async ({
+test("the shell looks as committed, in light and dark, with no ad slot, and skips to the editor", async ({
   page,
 }) => {
-  await expectShellLook(page);
+  await expectShellLook(page, { ad: false });
 });

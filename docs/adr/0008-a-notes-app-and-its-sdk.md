@@ -1,6 +1,6 @@
 # 0008. A notes app for handwriting, backed by a new notes SDK
 
-- **Status:** Accepted
+- **Status:** Accepted; the ad slot in the library amended by [ADR 0011](0011-the-ad-slot-in-the-editors-column.md): the notes app has no slot for now
 - **Date:** 2026-11-23
 
 ## Context
