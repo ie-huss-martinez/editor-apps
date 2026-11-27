@@ -123,13 +123,24 @@ describe("createPreferencesStore", () => {
   });
 
   it("works for the visit without any storage", () => {
-    const preferences = createPreferencesStore({
-      key: KEY,
-      defaults: shellDefaultPreferences,
-      storage: undefined,
+    // A browser that refuses storage outright: reading localStorage throws.
+    const original = Object.getOwnPropertyDescriptor(window, "localStorage");
+    Object.defineProperty(window, "localStorage", {
+      configurable: true,
+      get() {
+        throw new DOMException("Storage is disabled.", "SecurityError");
+      },
     });
-    preferences.set({ ...preferences.get(), mode: "expert" });
-    expect(preferences.get().mode).toBe("expert");
+    try {
+      const preferences = createPreferencesStore({ key: KEY, defaults: shellDefaultPreferences });
+      expect(preferences.get().mode).toBe("easy");
+      preferences.set({ ...preferences.get(), mode: "expert" });
+      expect(preferences.get().mode).toBe("expert");
+    } finally {
+      // Back to the window's own storage, or to the one it inherits.
+      if (original) Object.defineProperty(window, "localStorage", original);
+      else Reflect.deleteProperty(window, "localStorage");
+    }
   });
 
   it("follows a change made in another tab of the app, and only to its own key", () => {
