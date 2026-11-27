@@ -3,6 +3,19 @@ import { themeScript, themeScriptPath } from "./theme-script.ts";
 
 const KEY = "editor-preferences:notes";
 
+/** A fake `<meta>`, with its attributes in a map. */
+function meta(attributes: Record<string, string>) {
+  const map = new Map(Object.entries(attributes));
+  return {
+    map,
+    getAttribute: (name: string) => map.get(name) ?? null,
+    setAttribute: (name: string, value: string) => map.set(name, value),
+  };
+}
+
+/** The page's two theme-color metas, as pdf's and notes' index.html have them. */
+let metas: ReturnType<typeof meta>[] = [];
+
 /** Runs the script against a fake page, with what `localStorage` holds, and returns `<html>`'s theme. */
 function run(stored: string | null | (() => never), key = KEY): string | undefined {
   const attributes = new Map<string, string>();
@@ -11,8 +24,13 @@ function run(stored: string | null | (() => never), key = KEY): string | undefin
       typeof stored === "function" ? stored() : asked === key ? stored : null,
   };
   const window = { localStorage };
+  metas = [
+    meta({ name: "theme-color", media: "(prefers-color-scheme: light)", content: "#fff" }),
+    meta({ name: "theme-color", media: "(prefers-color-scheme: dark)", content: "#000" }),
+  ];
   const document = {
     documentElement: { setAttribute: (name: string, value: string) => attributes.set(name, value) },
+    querySelectorAll: () => metas,
   };
   new Function("window", "document", themeScript(KEY))(window, document);
   return attributes.get("data-hm-theme");
@@ -23,8 +41,20 @@ describe("themeScript", () => {
     expect(run(JSON.stringify({ theme, mode: "easy" }))).toBe(theme);
   });
 
+  it("points the theme-color metas at a chosen theme, keeping their own media", () => {
+    run(JSON.stringify({ theme: "dark" }));
+    expect(metas.map(({ map }) => [map.get("media"), map.get("data-media")])).toEqual([
+      ["not all", "(prefers-color-scheme: light)"],
+      ["all", "(prefers-color-scheme: dark)"],
+    ]);
+  });
+
   it("sets nothing for the system's theme, so the page follows it", () => {
     expect(run(JSON.stringify({ theme: "system" }))).toBeUndefined();
+    expect(metas.map(({ map }) => map.get("media"))).toEqual([
+      "(prefers-color-scheme: light)",
+      "(prefers-color-scheme: dark)",
+    ]);
   });
 
   it.each([

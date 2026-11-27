@@ -124,11 +124,11 @@ export function editorApp(options: EditorAppOptions = {}): Plugin[] {
     },
     transformIndexHtml() {
       return [
-        // First in the head, and blocking, so it runs before the stylesheets
-        // apply and before anything is painted.
+        // At the end of the head, and blocking, so it runs before anything
+        // is painted, once the page's theme-color metas it retargets exist.
         ...(themeUrl === undefined
           ? []
-          : [{ tag: "script", attrs: { src: themeUrl }, injectTo: "head-prepend" as const }]),
+          : [{ tag: "script", attrs: { src: themeUrl }, injectTo: "head" as const }]),
         ...(options.canonicalUrl
           ? [
               {

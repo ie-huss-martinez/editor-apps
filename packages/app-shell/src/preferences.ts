@@ -43,11 +43,23 @@ function localStorageOrNone(): Storage | undefined {
 /**
  * Sets the page's theme as the build's theme script does before first
  * paint: `light` or `dark` on `<html>`, and nothing for `system`, which
- * then follows `prefers-color-scheme`.
+ * then follows `prefers-color-scheme`. The page's `theme-color` metas
+ * follow: for a chosen theme, the one for that scheme applies and the
+ * other doesn't; for `system`, each gets its own `media` back.
  */
 function applyTheme(root: Element, theme: EditorPreferences["theme"]): void {
   if (theme === "system") root.removeAttribute("data-hm-theme");
   else root.setAttribute("data-hm-theme", theme);
+  for (const meta of root.ownerDocument.querySelectorAll('meta[name="theme-color"][media]')) {
+    const media = meta.getAttribute("data-media") ?? meta.getAttribute("media") ?? "";
+    if (theme === "system") {
+      meta.setAttribute("media", media);
+      meta.removeAttribute("data-media");
+    } else {
+      meta.setAttribute("data-media", media);
+      meta.setAttribute("media", media.includes(theme) ? "all" : "not all");
+    }
+  }
 }
 
 /**
