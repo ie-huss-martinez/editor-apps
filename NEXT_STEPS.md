@@ -60,4 +60,4 @@ The SDKs' UX redesign (sdk-core ADR 0067) in every app: ui 0.17, with each SDK o
 
 - [x] **Every app on the frame,** with its preferences kept on the device, Easy mode on a first visit, and the page's theme set before first paint by a script from the app's own origin (ADR 0010).
 - [x] **The ad slot in the editor's properties column,** at the foot of the frame's inline-end column, on viewports of 1280 × 720 or more (ADR 0011).
-- [ ] **A place for the notes app's slot,** which has none for now: the library has no frame, and ADR 0008 keeps ads away from an open notebook (ADR 0011).
+- [x] **The notes app's slot beside the page,** in the open notebook's properties column, as Huss decided (ADR 0011).

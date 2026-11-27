@@ -7,6 +7,7 @@ import {
   AppShell,
   startApp,
   type UnsavedAfter,
+  useAdSlot,
   useEditorEvents,
   useEditorPreferenceProps,
 } from "@editor-apps/app-shell";
@@ -17,6 +18,7 @@ import {
   type NotesEditorView,
 } from "@hussmartinez/notes-sdk/react";
 import { useCallback, useRef, useState } from "react";
+import { AdArt } from "./AdArt.tsx";
 import { appConfig } from "./app.config.ts";
 
 /**
@@ -34,10 +36,9 @@ const KEEPING = new Set<NotesLibraryEvent["type"]>([
 
 /**
  * notes-sdk's `NotesEditor` in the shared shell (docs/adr/0002). The
- * library shows the header; an open notebook has the whole screen, with no
- * ad beside the page being written on (docs/adr/0008). The ad slot is in an
- * editor's properties column now, which the library doesn't have, so this
- * app has no slot (docs/adr/0011). The
+ * library shows the header; an open notebook has the whole screen, with the
+ * ad slot at the foot of its properties column, as in the other editors
+ * (docs/adr/0011). The library has no frame, so no slot. The
  * SDK's PDF engine runs from the app's own origin (vite.config.ts), its
  * anonymous events go to the app's analytics (docs/adr/0005), and its
  * preferences are kept on the device (docs/adr/0010).
@@ -45,6 +46,7 @@ const KEEPING = new Set<NotesLibraryEvent["type"]>([
 function App() {
   const { onEvent: forward } = useEditorEvents(savedAsYouWrite);
   const preferences = useEditorPreferenceProps();
+  const ad = useAdSlot(<AdArt />);
   const handle = useRef<NotesEditorHandle>(null);
   const [view, setView] = useState<NotesEditorView>({ view: "library" });
   const asked = useRef(false);
@@ -76,6 +78,7 @@ function App() {
         assetsUrl={__SDK_ASSETS_URL__}
         onEvent={onEvent}
         onViewChange={setView}
+        propertiesFooter={ad}
         {...preferences}
       />
     </AppShell>

@@ -1,6 +1,6 @@
 # 0008. A notes app for handwriting, backed by a new notes SDK
 
-- **Status:** Accepted; the ad slot in the library amended by [ADR 0011](0011-the-ad-slot-in-the-editors-column.md): the notes app has no slot for now
+- **Status:** Accepted; the ad slot amended by [ADR 0011](0011-the-ad-slot-in-the-editors-column.md): Huss decided on 2026-11-27 that it shows beside the open notebook's page, like the other editors, and not in the library
 - **Date:** 2026-11-23
 
 ## Context
@@ -48,7 +48,7 @@ This app isn't like the other four. They open a file, edit it and export it, and
 ### The shell
 
 - **A full-screen layout** in `app-shell` for the open notebook, with no header column taking width from the page.
-- **The ad slot appears in the library only,** never beside a page someone is writing on.
+- **The ad slot appears in the library only,** never beside a page someone is writing on. *Changed by [ADR 0011](0011-the-ad-slot-in-the-editors-column.md) on 2026-11-27: it now shows beside the page, in the notebook's properties column.*
 - **No leave guard,** because the app saves as you write:
   - **When a save starts:** 400 ms after the last change, but never more than 2 s after the first change not yet saved, so steady writing can't keep postponing it. It also starts at once when the tab is hidden or the page goes away (`visibilitychange`, `pagehide`). Saves run one at a time, and a change made during one is saved by the next.
   - **How a write lands:** each page is its own file, written to a temporary file that replaces the old one only once it's complete. An interrupted write leaves the earlier page whole, never half of one.
