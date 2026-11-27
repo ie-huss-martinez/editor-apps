@@ -1,6 +1,6 @@
 # 0010. Editor preferences kept on the device, and the page's theme before first paint
 
-- **Status:** Accepted
+- **Status:** Accepted; amended 2026-11-27: the theme script runs at the end of `<head>` and also sets the toolbar colour
 - **Date:** 2026-11-27
 - **Supersedes:** the "following the system" part of "The theme" in [ADR 0002](0002-app-shell-and-shared-look.md)
 
@@ -34,7 +34,7 @@ Huss decided on 2026-11-26 that each app keeps its own theme, with no cookie sha
 
 ### The page's theme before first paint
 
-- **A theme script in every page.** `editorApp({ preferencesKey })` in `build-config` writes a script of a dozen lines and loads it first in `<head>`. It reads the app's key, and sets `data-hm-theme` on `<html>` when the theme there is `light` or `dark`. For `system`, nothing kept, or anything it can't read, it sets nothing, and the page follows the system as before. It never throws.
+- **A theme script in every page.** `editorApp({ preferencesKey })` in `build-config` writes a script of a dozen lines and loads it at the end of `<head>`, blocking, so it runs before anything is painted and after the page's metas. It reads the app's key, and sets `data-hm-theme` on `<html>` when the theme there is `light` or `dark`. It also points the page's `theme-color` metas at that theme: the one for that scheme applies and the other doesn't, each keeping its own `media` in `data-media`. The shell does the same when the theme changes, and gives them their `media` back for `system`. For `system`, nothing kept, or anything it can't read, it sets nothing, and the page follows the system as before. It never throws.
 - **It's a classic, blocking script,** so the browser runs it before it parses `<body>`, and nothing is painted before it. ui's themes, the brand themes included, apply to `:root[data-hm-theme]`, so the shell's header and background are in the chosen theme from the first frame.
 - **A change in the editor reaches the page at once:** the store sets or removes the same attribute whenever the theme changes, so the header follows the editor's theme toggle and settings.
 - **Served from the app's own origin,** at `/assets/theme-<digest>.js`, named after its contents: cached as immutable like the bundle, and kept for offline use by the service worker with every other file of the build ([ADR 0009](0009-offline-apps-with-a-service-worker.md)). The dev server serves it at the same path.
@@ -61,5 +61,5 @@ Huss decided on 2026-11-26 that each app keeps its own theme, with no cookie sha
 - **Each app keeps its own choices.** Choosing dark in the PDF editor doesn't change the image editor.
 - **Every page loads one more small script,** from its own origin, before anything else. It's cached for a year, and offline in the notes app.
 - **Changing what's stored stays safe:** a value from an older or newer version still reads, field by field, through ui's reader.
-- **The browser's own colour for its toolbar** (`<meta name="theme-color">` in the pdf and notes apps) still follows the system, not a chosen theme. Matching it would need the script to change those tags too.
+- **The browser's own colour for its toolbar** (`<meta name="theme-color">` in the pdf and notes apps) follows the chosen theme, as the page does (amended 2026-11-27; it first followed the system only).
 - **The legal reading** that storing a person's own interface choices needs no consent, as a service they asked for, is the owner's to confirm, as for analytics in [ADR 0005](0005-analytics-and-consent.md).

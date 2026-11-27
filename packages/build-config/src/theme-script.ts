@@ -16,6 +16,10 @@ import { createHash } from "node:crypto";
  * The script's source, for one app's key. It reads only the `theme` field,
  * sets `data-hm-theme` on `<html>` for `light` or `dark`, and sets nothing
  * for `system` or for anything else, so the page then follows the system.
+ * For a chosen theme it also points the page's `theme-color` metas at it:
+ * the one for that scheme applies, and the other doesn't, with each one's
+ * own `media` kept in `data-media` so the shell can restore it. The build
+ * loads it after those metas, which must exist when it runs.
  * It never throws: blocked storage or a value that isn't JSON leaves the
  * page as it is.
  *
@@ -31,6 +35,13 @@ export function themeScript(storageKey: string): string {
     var theme = stored && stored.theme;
     if (theme === "light" || theme === "dark") {
       document.documentElement.setAttribute("data-hm-theme", theme);
+      // The browser's toolbar colour follows the chosen theme too.
+      var metas = document.querySelectorAll('meta[name="theme-color"][media]');
+      for (var i = 0; i < metas.length; i++) {
+        var media = metas[i].getAttribute("media");
+        metas[i].setAttribute("data-media", media);
+        metas[i].setAttribute("media", media.indexOf(theme) === -1 ? "not all" : "all");
+      }
     }
   } catch (error) {
     // Storage blocked, or a value that isn't JSON: the page follows the system.

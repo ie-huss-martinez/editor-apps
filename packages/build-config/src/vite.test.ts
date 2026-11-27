@@ -56,11 +56,14 @@ describe("editorApp", () => {
     );
   });
 
-  it("loads the theme script first in the page's head, as a blocking script from its own origin", () => {
+  it("loads the theme script in the page's head, after its metas, as a blocking script from its own origin", () => {
     const html = readFileSync(path.join(root, "dist/index.html"), "utf8");
     const head = /<head>([\s\S]*?)<\/head>/.exec(html)?.[1] ?? html;
-    // Before every stylesheet and module, so it runs before anything is painted.
-    expect(head.trimStart().startsWith(`<script src="${THEME_URL}"></script>`)).toBe(true);
+    // In the head, so it runs before anything is painted, and after every
+    // meta, as it retargets the theme-color ones.
+    const script = head.indexOf(`<script src="${THEME_URL}"></script>`);
+    expect(script).toBeGreaterThan(-1);
+    expect(head.lastIndexOf("<meta")).toBeLessThan(script);
     // Every script has a source: none is inline, which the policy forbids.
     for (const tag of html.match(/<script\b[^>]*>[\s\S]*?<\/script>/g) ?? []) {
       expect(tag).toMatch(/^<script\b[^>]*\ssrc="\/[^"]*"[^>]*><\/script>$/);

@@ -67,6 +67,31 @@ describe("createPreferencesStore", () => {
     expect(html.getAttribute("data-hm-theme")).toBe("dark");
   });
 
+  it("points the page's theme-color metas at a chosen theme, and gives them back for the system's", () => {
+    const metas = ["light", "dark"].map((scheme) => {
+      const meta = document.createElement("meta");
+      meta.setAttribute("name", "theme-color");
+      meta.setAttribute("media", `(prefers-color-scheme: ${scheme})`);
+      document.head.append(meta);
+      return meta;
+    });
+    try {
+      const preferences = store();
+      preferences.set({ ...preferences.get(), theme: "dark" });
+      expect(metas.map((meta) => meta.getAttribute("media"))).toEqual(["not all", "all"]);
+      preferences.set({ ...preferences.get(), theme: "light" });
+      expect(metas.map((meta) => meta.getAttribute("media"))).toEqual(["all", "not all"]);
+      preferences.set({ ...preferences.get(), theme: "system" });
+      expect(metas.map((meta) => meta.getAttribute("media"))).toEqual([
+        "(prefers-color-scheme: light)",
+        "(prefers-color-scheme: dark)",
+      ]);
+      expect(metas.some((meta) => meta.hasAttribute("data-media"))).toBe(false);
+    } finally {
+      for (const meta of metas) meta.remove();
+    }
+  });
+
   it.each([
     ["text that isn't JSON", "{not json"],
     ["a number", "42"],
