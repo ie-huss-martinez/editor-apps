@@ -134,9 +134,14 @@ test("a notebook has the whole screen, keeps what's written, and never asks befo
   // the pen's options it needs a viewport about 1,000 px high; with the
   // panel hidden it keeps the column on its own.
   const properties = page.locator(".hm-editor-frame-properties-button");
+  const panel = page.locator("aside.hm-editor-frame-properties");
+  await expect(panel).toBeVisible();
+  // Hidden: the slot is checked alone in the column, at 1440 x 900.
   await properties.click();
+  await expect(panel).toBeHidden();
   await expectAdSlotInTheFrame(page);
   await properties.click();
+  await expect(panel).toBeVisible();
 
   await page.getByRole("button", { name: "Back to the library" }).click();
   await expect(page.locator(".app-shell-full")).toHaveCount(0);
