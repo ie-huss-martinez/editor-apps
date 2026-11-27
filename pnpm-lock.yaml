@@ -446,8 +446,8 @@ importers:
         specifier: workspace:*
         version: link:../../packages/app-shell
       '@hussmartinez/pdf-sdk':
-        specifier: 0.8.1
-        version: 0.8.1(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
+        specifier: 0.8.2
+        version: 0.8.2(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
       '@hussmartinez/sdk-core':
         specifier: 'catalog:'
         version: 0.4.9
@@ -1198,6 +1198,18 @@ packages:
 
   '@hussmartinez/pdf-sdk@0.8.1':
     resolution: {integrity: sha512-xaSkBhFfM/PZmmx1GgvRIN10LDv276hZP7ttGp8CMqIqNZhSly73LoJJpJqkPwILDieTbGhxeyrguku3ONalug==}
+    engines: {node: '>=24'}
+    peerDependencies:
+      react: '>=18.3'
+      react-dom: '>=18.3'
+    peerDependenciesMeta:
+      react:
+        optional: true
+      react-dom:
+        optional: true
+
+  '@hussmartinez/pdf-sdk@0.8.2':
+    resolution: {integrity: sha512-wgUNKulHPtyIrzMS0lkYk7iBp+RLzYBb13bON/341vXMRJMfl4fUdfaePGTfOy6Og29NE/7IvESkkcAhJ0Blzw==}
     engines: {node: '>=24'}
     peerDependencies:
       react: '>=18.3'
@@ -3486,6 +3498,17 @@ snapshots:
       - react-native-svg
 
   '@hussmartinez/pdf-sdk@0.8.1(react-dom@19.3.1(react@19.3.1))(react@19.3.1)':
+    dependencies:
+      '@hussmartinez/sdk-core': 0.4.9
+      '@hussmartinez/ui': 0.17.1(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
+    optionalDependencies:
+      react: 19.3.1
+      react-dom: 19.3.1(react@19.3.1)
+    transitivePeerDependencies:
+      - react-native
+      - react-native-svg
+
+  '@hussmartinez/pdf-sdk@0.8.2(react-dom@19.3.1(react@19.3.1))(react@19.3.1)':
     dependencies:
       '@hussmartinez/sdk-core': 0.4.9
       '@hussmartinez/ui': 0.17.1(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
