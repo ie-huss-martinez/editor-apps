@@ -17,7 +17,7 @@ import {
   test,
 } from "@editor-apps/build-config/playwright";
 import { appConfig } from "../src/app.config.ts";
-import { blankPdf } from "./fixture.ts";
+import { blankPdf, lockedPdf } from "./fixture.ts";
 
 // The `problems` fixture fails either test on a console error, a policy
 // violation, a failed response or a request to another origin.
@@ -80,6 +80,44 @@ test("a PDF opens, is edited and downloads, guarded until then, with the SDK's a
 
   expectSdkAssets(problems, page, "@hussmartinez/pdf-sdk");
   await expectAnalytics(problems, analytics, appConfig.app);
+});
+
+test("a password-protected PDF opens with its password, and downloads still protected", async ({
+  page,
+}) => {
+  // The wiring only: the SDK's dialog under this page's policy, the
+  // password reaching both of its workers, and the leave guard. What the
+  // dialog says and does is the SDK's to test (docs/adr/0003).
+  await page.goto("/");
+  await page
+    .locator('input[type="file"]')
+    .first()
+    .setInputFiles({
+      name: "locked.pdf",
+      mimeType: "application/pdf",
+      buffer: lockedPdf("smoke test"),
+    });
+  const dialog = page.getByRole("dialog", { name: "This PDF needs a password" });
+  await dialog.getByLabel("Password").fill("smoke test");
+  await dialog.getByRole("button", { name: "Unlock" }).click();
+  await expect(page.locator("header output")).toHaveText("locked.pdf · 1 page");
+
+  // An edit, so the processing worker reads the file with the password.
+  await page
+    .getByRole("navigation", { name: "Tools" })
+    .getByRole("button", { name: /^Rotate right\b/ })
+    .click();
+  await expect.poll(() => leavingAsks(page)).toBe(true);
+  await page.getByRole("button", { name: "Download", exact: true }).click();
+  const choice = page.getByRole("dialog", { name: "This PDF has a password" });
+  const saving = page.waitForEvent("download");
+  await choice.getByRole("button", { name: "Download" }).click();
+  const pdf = (await readFile(await (await saving).path())).toString("latin1");
+  expect(pdf.slice(0, 5)).toBe("%PDF-");
+  // Still encrypted, and with AES-256 now, not the RC4 it came with.
+  expect(pdf).toMatch(/\/Encrypt\b/);
+  expect(pdf).toMatch(/\/CFM\s*\/AESV3\b/);
+  await expect.poll(() => leavingAsks(page)).toBe(false);
 });
 
 test("the page has the theme chosen in the editor before it's painted", async ({ page }) => {
