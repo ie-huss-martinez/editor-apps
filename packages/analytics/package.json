@@ -12,7 +12,7 @@
     "test": "vitest run"
   },
   "dependencies": {
-    "posthog-js": "1.442.1"
+    "posthog-js": "1.454.4"
   },
   "devDependencies": {
     "typescript": "catalog:",
